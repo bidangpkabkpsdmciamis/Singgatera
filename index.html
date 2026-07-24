@@ -472,25 +472,34 @@
       /* ===== HERO SECTION ===== */
       .hero {
         padding: 160px 20px 100px;
-        background: linear-gradient(
-            rgba(15, 23, 42, 0.9),
-            rgba(30, 41, 59, 0.9)
-          ),
-          url("https://i.ibb.co.com/G4wSBLDz/bkpsdm-tampak-depan-1.jpg")
-            center/cover no-repeat;
-        color: white;
         position: relative;
         overflow: hidden;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
       }
 
-      .hero::before {
-        content: "";
+      .video-background {
         position: absolute;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        background: radial-gradient(
+        object-fit: cover;
+        z-index: 0;
+      }
+
+      .hero-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+            rgba(15, 23, 42, 0.85),
+            rgba(30, 41, 59, 0.85)
+          ),
+          radial-gradient(
             circle at 20% 50%,
             rgba(37, 99, 235, 0.15) 0%,
             transparent 50%
@@ -500,6 +509,7 @@
             rgba(124, 58, 237, 0.1) 0%,
             transparent 50%
           );
+        z-index: 1;
       }
 
       .hero-container {
@@ -508,7 +518,7 @@
         gap: 60px;
         align-items: center;
         position: relative;
-        z-index: 1;
+        z-index: 2;
       }
 
       .hero-content {
@@ -531,6 +541,7 @@
         font-size: 3.5rem;
         margin-bottom: 20px;
         line-height: 1.1;
+        color: white;
       }
 
       .hero-title span {
@@ -630,6 +641,7 @@
       /* ===== SERVICES SECTION ===== */
       .services {
         background: var(--light-gray);
+        transition: opacity 0.5s ease;
       }
 
       .services-grid {
@@ -707,6 +719,48 @@
 
       .service-card:hover .service-link i {
         transform: translateX(5px);
+      }
+
+      /* ===== LOCKED SERVICES ===== */
+      .services-locked {
+        text-align: center;
+        padding: 80px 20px;
+        background: var(--light-gray);
+        border-radius: var(--border-radius);
+        margin-top: 40px;
+      }
+
+      .services-locked .lock-icon {
+        font-size: 4rem;
+        color: var(--gray);
+        margin-bottom: 20px;
+      }
+
+      .services-locked h3 {
+        font-size: 2rem;
+        color: var(--dark-blue);
+        margin-bottom: 15px;
+      }
+
+      .services-locked p {
+        font-size: 1.2rem;
+        color: var(--gray);
+        max-width: 500px;
+        margin: 0 auto 30px;
+      }
+
+      .services-locked .btn {
+        margin: 0 auto;
+      }
+
+      /* Tombol Akses Cepat - hanya muncul saat login */
+      .quick-access-btn {
+        margin-top: 30px;
+        display: none;
+      }
+
+      .quick-access-btn.visible {
+        display: block;
       }
 
       /* ===== ABOUT SECTION ===== */
@@ -1189,6 +1243,10 @@
       .fade-in {
         animation: fadeIn 0.6s ease forwards;
       }
+
+      .hidden-section {
+        display: none !important;
+      }
     </style>
   </head>
   <body>
@@ -1212,8 +1270,6 @@
             <li><a href="index.html" class="nav-link active">Home</a></li>
             <li><a href="ksf.html" class="nav-link">Konsultasi & Saran</a></li>
             <li><a href="informasi.html" class="nav-link">Informasi</a></li>
-            <!--   <li><a href="pelatihan.html" class="nav-link">Pelatihan</a></li>
-                    <li><a href="asesmen.html" class="nav-link">Asesmen</a></li>  -->
           </ul>
 
           <div class="header-actions">
@@ -1269,8 +1325,13 @@
       </div>
     </header>
 
-    <!-- ===== HERO SECTION ===== -->
+    <!-- ===== HERO SECTION WITH VIDEO BACKGROUND ===== -->
     <section class="hero">
+      <video autoplay muted loop playsinline class="video-background">
+        <source src="https://bkpsdm.ciamiskab.go.id/assetss/teasernew.mp4" type="video/mp4">
+      </video>
+      <div class="hero-overlay"></div>
+
       <div class="container hero-container">
         <div class="hero-content fade-in">
           <div class="hero-badge">
@@ -1333,7 +1394,7 @@
     </section>
 
     <!-- ===== SERVICES SECTION ===== -->
-    <section class="services">
+    <section class="services" id="servicesSection">
       <div class="container">
         <div class="section-header">
           <div class="section-tag">LAYANAN UTAMA</div>
@@ -1342,95 +1403,122 @@
             Akses berbagai layanan untuk meningkatkan kapasitas dan
             profesionalisme ASN Kabupaten Ciamis
           </p>
+
+          <!-- ===== TOMBOL AKSES CEPAT EVALUASI (hanya muncul saat login) ===== -->
+          <div class="quick-access-btn" id="quickAccessBtn">
+            <a href="evaluasi.html" class="btn btn-accent" style="padding: 16px 40px; font-size: 1.1rem; box-shadow: var(--shadow-lg);">
+              <i class="fas fa-rocket" style="font-size: 1.3rem;"></i>
+              <span style="display: flex; flex-direction: column; align-items: flex-start; line-height: 1.3;">
+                <span style="font-weight: 700; font-size: 1.2rem;">Akses Cepat</span>
+                <span style="font-weight: 400; font-size: 0.85rem; opacity: 0.95;">Evaluasi dan Penilaian</span>
+              </span>
+              <i class="fas fa-arrow-right" style="margin-left: 5px;"></i>
+            </a>
+          </div>
         </div>
 
-        <div class="services-grid">
-          <div class="service-card fade-in">
-            <div class="service-icon">
-              <i class="fas fa-user-tie"></i>
-            </div>
-            <h3>Pelatihan Struktural</h3>
-            <p>
-              Pengembangan keterampilan kepemimpinan, manajemen strategis, dan
-              pengambilan keputusan untuk pimpinan dan calon pimpinan.
-            </p>
-            <a href="pelatihanman.html" class="service-link">
-              Selengkapnya <i class="fas fa-arrow-right"></i>
-            </a>
+        <!-- Locked state (shown when not logged in) -->
+        <div id="servicesLocked" class="services-locked">
+          <div class="lock-icon">
+            <i class="fas fa-lock"></i>
           </div>
+          <h3>🔒 Akses Terbatas</h3>
+          <p>Ingin akses layanan lebih lengkap? Yuk, login dulu!</p>
+          <a href="login.html" class="btn btn-primary">
+            <i class="fas fa-sign-in-alt"></i> Login Sekarang
+          </a>
+        </div>
 
-          <div class="service-card fade-in">
-            <div class="service-icon">
-              <i class="fas fa-cogs"></i>
+        <!-- Unlocked state (shown when logged in) -->
+        <div id="servicesUnlocked" class="hidden-section">
+          <div class="services-grid">
+            <div class="service-card fade-in">
+              <div class="service-icon">
+                <i class="fas fa-user-tie"></i>
+              </div>
+              <h3>Pelatihan Struktural</h3>
+              <p>
+                Pengembangan keterampilan kepemimpinan, manajemen strategis, dan
+                pengambilan keputusan untuk pimpinan dan calon pimpinan.
+              </p>
+              <a href="pelatihanman.html" class="service-link">
+                Selengkapnya <i class="fas fa-arrow-right"></i>
+              </a>
             </div>
-            <h3>Pelatihan Teknis</h3>
-            <p>
-              Pelatihan spesifik sesuai bidang tugas untuk meningkatkan
-              kemampuan teknis dan operasional ASN.
-            </p>
-            <a href="#" class="service-link">
-              Selengkapnya <i class="fas fa-arrow-right"></i>
-            </a>
-          </div>
 
-          <div class="service-card fade-in">
-            <div class="service-icon">
-              <i class="fas fa-users"></i>
+            <div class="service-card fade-in">
+              <div class="service-icon">
+                <i class="fas fa-cogs"></i>
+              </div>
+              <h3>Pelatihan Teknis</h3>
+              <p>
+                Pelatihan spesifik sesuai bidang tugas untuk meningkatkan
+                kemampuan teknis dan operasional ASN.
+              </p>
+              <a href="#" class="service-link">
+                Selengkapnya <i class="fas fa-arrow-right"></i>
+              </a>
             </div>
-            <h3>Pelatihan Sosial Kultural</h3>
-            <p>
-              Pengembangan soft skills, etika pelayanan publik, dan adaptasi
-              budaya organisasi.
-            </p>
-            <a href="#" class="service-link">
-              Selengkapnya <i class="fas fa-arrow-right"></i>
-            </a>
-          </div>
 
-          <div class="service-card fade-in">
-            <div class="service-icon">
-              <i class="fas fa-book"></i>
+            <div class="service-card fade-in">
+              <div class="service-icon">
+                <i class="fas fa-users"></i>
+              </div>
+              <h3>Pelatihan Sosial Kultural</h3>
+              <p>
+                Pengembangan soft skills, etika pelayanan publik, dan adaptasi
+                budaya organisasi.
+              </p>
+              <a href="#" class="service-link">
+                Selengkapnya <i class="fas fa-arrow-right"></i>
+              </a>
             </div>
-            <h3>SIBANGPECI</h3>
-            <p>
-              Sistem Informasi Bangunan Pendidikan dan Pelatihan Ciamis
-              Terintegrasi untuk manajemen diklat.
-            </p>
-            <a
-              href="https://sibangpeci.ciamiskab.go.id/"
-              target="_blank"
-              class="service-link"
-            >
-              Kunjungi <i class="fas fa-external-link-alt"></i>
-            </a>
-          </div>
 
-          <div class="service-card fade-in">
-            <div class="service-icon">
-              <i class="fas fa-chart-bar"></i>
+            <div class="service-card fade-in">
+              <div class="service-icon">
+                <i class="fas fa-book"></i>
+              </div>
+              <h3>SIBANGPECI</h3>
+              <p>
+                Sistem Informasi Bangunan Pendidikan dan Pelatihan Ciamis
+                Terintegrasi untuk manajemen diklat.
+              </p>
+              <a
+                href="https://sibangpeci.ciamiskab.go.id/"
+                target="_blank"
+                class="service-link"
+              >
+                Kunjungi <i class="fas fa-external-link-alt"></i>
+              </a>
             </div>
-            <h3>Asesmen Kompetensi</h3>
-            <p>
-              Evaluasi dan pengukuran potensi, kompetensi, dan kinerja ASN untuk
-              perencanaan pengembangan.
-            </p>
-            <a href="asesmen.html" class="service-link">
-              Selengkapnya <i class="fas fa-arrow-right"></i>
-            </a>
-          </div>
 
-          <div class="service-card fade-in">
-            <div class="service-icon">
-              <i class="fas fa-graduation-cap"></i>
+            <div class="service-card fade-in">
+              <div class="service-icon">
+                <i class="fas fa-chart-bar"></i>
+              </div>
+              <h3>Asesmen Kompetensi</h3>
+              <p>
+                Evaluasi dan pengukuran potensi, kompetensi, dan kinerja ASN untuk
+                perencanaan pengembangan.
+              </p>
+              <a href="asesmen.html" class="service-link">
+                Selengkapnya <i class="fas fa-arrow-right"></i>
+              </a>
             </div>
-            <h3>Tugas Belajar</h3>
-            <p>
-              Fasilitas dan informasi mengenai program tugas belajar untuk
-              pengembangan akademik dan karir ASN.
-            </p>
-            <a href="tubel.html" class="service-link">
-              Selengkapnya <i class="fas fa-arrow-right"></i>
-            </a>
+
+            <div class="service-card fade-in">
+              <div class="service-icon">
+                <i class="fas fa-graduation-cap"></i>
+              </div>
+              <h3>Tugas Belajar</h3>
+              <p>
+                Fasilitas dan informasi mengenai program tugas belajar untuk
+                pengembangan akademik dan karir ASN.
+              </p>
+              <a href="tubel.html" class="service-link">
+                Selengkapnya <i class="fas fa-arrow-right"></i>
+              </a>
+            </div>
           </div>
         </div>
       </div>
@@ -1692,6 +1780,11 @@
       const saranCount = document.getElementById("saranCount");
       const feedbackCount = document.getElementById("feedbackCount");
 
+      // Services section elements
+      const servicesLocked = document.getElementById("servicesLocked");
+      const servicesUnlocked = document.getElementById("servicesUnlocked");
+      const quickAccessBtn = document.getElementById("quickAccessBtn");
+
       // ====== SCROLL EFFECTS ======
       window.addEventListener("scroll", () => {
         // Header shadow on scroll
@@ -1739,6 +1832,19 @@
         userDropdown.classList.remove("active");
       });
 
+      // ====== TOGGLE SERVICES & QUICK ACCESS BASED ON LOGIN ======
+      function toggleServices(isLoggedIn) {
+        if (isLoggedIn) {
+          servicesLocked.classList.add("hidden-section");
+          servicesUnlocked.classList.remove("hidden-section");
+          quickAccessBtn.classList.add("visible");
+        } else {
+          servicesLocked.classList.remove("hidden-section");
+          servicesUnlocked.classList.add("hidden-section");
+          quickAccessBtn.classList.remove("visible");
+        }
+      }
+
       // ====== CHECK LOGIN STATUS ======
       function checkLoginStatus() {
         const loginData = localStorage.getItem("loginData");
@@ -1764,6 +1870,8 @@
               '<i class="fas fa-user-circle"></i> Profil Saya';
             loginBtn.href = "profile.html";
 
+            // Show services & quick access
+            toggleServices(true);
             return;
           } else {
             // Login expired
@@ -1777,6 +1885,9 @@
         dropdownEmail.textContent = "Silakan login untuk akses lengkap";
         loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Masuk / Login';
         loginBtn.href = "login.html";
+
+        // Hide services & quick access
+        toggleServices(false);
       }
 
       // ====== LOGOUT FUNCTION ======
@@ -1878,7 +1989,7 @@
           );
         }
 
-        // Add animation to service cards on hover
+        // Add animation to service cards on hover (only when visible)
         document.querySelectorAll(".service-card").forEach((card) => {
           card.addEventListener("mouseenter", function () {
             this.style.transform = "translateY(-15px)";
