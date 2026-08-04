@@ -1297,7 +1297,7 @@
                   <p class="user-email" id="dropdownEmail">-</p>
                 </div>
                 <div class="dropdown-links">
-                  <a href="https://bidangpkabkpsdmciamis.github.io/ProfileASNCiamis/" class="dropdown-link">
+                  <a href="https://www.profile.singgatera.my.id/" class="dropdown-link">
                     <i class="fas fa-user-circle"></i>
                     <span>Profil Saya</span>
                   </a>
@@ -1785,6 +1785,113 @@
       const servicesUnlocked = document.getElementById("servicesUnlocked");
       const quickAccessBtn = document.getElementById("quickAccessBtn");
 
+      // ====== FUNGSI BACA COOKIE ======
+      function getCookie(name) {
+        const cookies = document.cookie.split('; ');
+        for (let cookie of cookies) {
+          const [key, value] = cookie.split('=');
+          if (key === name) {
+            try {
+              return JSON.parse(decodeURIComponent(value));
+            } catch (e) {
+              return null;
+            }
+          }
+        }
+        return null;
+      }
+
+      // ====== TOGGLE SERVICES & QUICK ACCESS BASED ON LOGIN ======
+      function toggleServices(isLoggedIn) {
+        if (isLoggedIn) {
+          servicesLocked.classList.add("hidden-section");
+          servicesUnlocked.classList.remove("hidden-section");
+          quickAccessBtn.classList.add("visible");
+        } else {
+          servicesLocked.classList.remove("hidden-section");
+          servicesUnlocked.classList.add("hidden-section");
+          quickAccessBtn.classList.remove("visible");
+        }
+      }
+
+      // ====== CHECK LOGIN STATUS (DIPERBAIKI DENGAN COOKIE) ======
+      function checkLoginStatus() {
+        let userData = null;
+        let isLoggedIn = false;
+        
+        // ===== STEP 1: CEK LOCALSTORAGE =====
+        const loginData = localStorage.getItem("loginData");
+        
+        if (loginData) {
+          userData = JSON.parse(loginData);
+          const loginTime = new Date(userData.loginTime);
+          const currentTime = new Date();
+
+          const isSameDay =
+            loginTime.getDate() === currentTime.getDate() &&
+            loginTime.getMonth() === currentTime.getMonth() &&
+            loginTime.getFullYear() === currentTime.getFullYear();
+
+          if (isSameDay) {
+            isLoggedIn = true;
+            console.log('[Home] ✅ Login valid dari localStorage');
+            
+            // ===== SYNC KE COOKIE =====
+            const cookieValue = encodeURIComponent(JSON.stringify(userData));
+            document.cookie = `loginData=${cookieValue}; path=/; domain=.singgatera.my.id; max-age=86400; SameSite=Lax; Secure`;
+            console.log('[Home] ✅ Cookie disinkronkan');
+          } else {
+            localStorage.removeItem("loginData");
+            console.log('[Home] ⚠️ Login di localStorage kadaluarsa');
+          }
+        }
+        
+        // ===== STEP 2: CEK COOKIE (FALLBACK) =====
+        if (!isLoggedIn) {
+          const cookieData = getCookie('loginData');
+          if (cookieData) {
+            console.log('[Home] ✅ Login data ditemukan di COOKIE (fallback)');
+            
+            // Restore ke localStorage
+            localStorage.setItem('loginData', JSON.stringify(cookieData));
+            userData = cookieData;
+            isLoggedIn = true;
+            console.log('[Home] ✅ Data login direstore dari cookie ke localStorage');
+            
+            // Reload untuk menerapkan perubahan
+            setTimeout(() => {
+              window.location.reload();
+            }, 500);
+            return;
+          }
+        }
+        
+        // ===== UPDATE UI =====
+        if (isLoggedIn && userData) {
+          // User is logged in
+          userName.textContent = userData.name;
+          dropdownName.textContent = userData.name;
+          dropdownEmail.textContent = userData.email || userData.username || "-";
+          loginBtn.innerHTML = '<i class="fas fa-user-circle"></i> Profil Saya';
+          loginBtn.href = "https://www.profile.singgatera.my.id/";
+
+          // Show services & quick access
+          toggleServices(true);
+          console.log('[Home] ✅ User logged in:', userData.name);
+        } else {
+          // User is not logged in
+          userName.textContent = "Guest";
+          dropdownName.textContent = "Guest";
+          dropdownEmail.textContent = "Silakan login untuk akses lengkap";
+          loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Masuk / Login';
+          loginBtn.href = "login.html";
+
+          // Hide services & quick access
+          toggleServices(false);
+          console.log('[Home] ❌ User not logged in');
+        }
+      }
+
       // ====== SCROLL EFFECTS ======
       window.addEventListener("scroll", () => {
         // Header shadow on scroll
@@ -1832,70 +1939,19 @@
         userDropdown.classList.remove("active");
       });
 
-      // ====== TOGGLE SERVICES & QUICK ACCESS BASED ON LOGIN ======
-      function toggleServices(isLoggedIn) {
-        if (isLoggedIn) {
-          servicesLocked.classList.add("hidden-section");
-          servicesUnlocked.classList.remove("hidden-section");
-          quickAccessBtn.classList.add("visible");
-        } else {
-          servicesLocked.classList.remove("hidden-section");
-          servicesUnlocked.classList.add("hidden-section");
-          quickAccessBtn.classList.remove("visible");
-        }
-      }
-
-      // ====== CHECK LOGIN STATUS ======
-      function checkLoginStatus() {
-        const loginData = localStorage.getItem("loginData");
-
-        if (loginData) {
-          const userData = JSON.parse(loginData);
-          const loginTime = new Date(userData.loginTime);
-          const currentTime = new Date();
-
-          // Check if login is still within the same day
-          const isSameDay =
-            loginTime.getDate() === currentTime.getDate() &&
-            loginTime.getMonth() === currentTime.getMonth() &&
-            loginTime.getFullYear() === currentTime.getFullYear();
-
-          if (isSameDay) {
-            // User is logged in
-            userName.textContent = userData.name;
-            dropdownName.textContent = userData.name;
-            dropdownEmail.textContent =
-              userData.email || userData.username || "-";
-            loginBtn.innerHTML =
-              '<i class="fas fa-user-circle"></i> Profil Saya';
-            loginBtn.href = "profile.html";
-
-            // Show services & quick access
-            toggleServices(true);
-            return;
-          } else {
-            // Login expired
-            localStorage.removeItem("loginData");
-          }
-        }
-
-        // User is not logged in
-        userName.textContent = "Guest";
-        dropdownName.textContent = "Guest";
-        dropdownEmail.textContent = "Silakan login untuk akses lengkap";
-        loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Masuk / Login';
-        loginBtn.href = "login.html";
-
-        // Hide services & quick access
-        toggleServices(false);
-      }
-
-      // ====== LOGOUT FUNCTION ======
+      // ====== LOGOUT FUNCTION (DIPERBAIKI) ======
       logoutBtn.addEventListener("click", (e) => {
         e.preventDefault();
+        
+        // Hapus cookie
+        document.cookie = `loginData=; path=/; domain=.singgatera.my.id; max-age=0`;
+        // Hapus localStorage
         localStorage.removeItem("loginData");
+        
+        console.log('[Home] ✅ Logout: Semua data login dihapus');
         alert("Anda telah keluar dari sistem.");
-        window.location.reload();
+        
+        window.location.href = "index.html?logout=true";
       });
 
       // ====== FETCH STATS DATA ======
@@ -1975,6 +2031,32 @@
 
       // ====== INITIALIZE ======
       document.addEventListener("DOMContentLoaded", () => {
+        // ===== CEK PARAMETER LOGOUT =====
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('logout') === 'true') {
+          // Hapus parameter dari URL
+          const cleanUrl = window.location.origin + window.location.pathname;
+          window.history.replaceState({}, document.title, cleanUrl);
+          console.log('[Home] ✅ Logout berhasil, URL dibersihkan');
+        }
+        
+        // ===== CEK PARAMETER LOGIN SUCCESS =====
+        if (urlParams.get('login') === 'success') {
+          // Hapus parameter dari URL
+          const cleanUrl = window.location.origin + window.location.pathname;
+          window.history.replaceState({}, document.title, cleanUrl);
+          console.log('[Home] ✅ Login success, sync cookie');
+          
+          // Force sync cookie
+          const loginData = localStorage.getItem('loginData');
+          if (loginData) {
+            const userData = JSON.parse(loginData);
+            const cookieValue = encodeURIComponent(JSON.stringify(userData));
+            document.cookie = `loginData=${cookieValue}; path=/; domain=.singgatera.my.id; max-age=86400; SameSite=Lax; Secure`;
+            console.log('[Home] ✅ Cookie disinkronkan setelah login');
+          }
+        }
+        
         checkLoginStatus();
         fetchStats();
         animateOnScroll();
