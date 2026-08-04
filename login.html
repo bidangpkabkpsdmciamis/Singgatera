@@ -9,10 +9,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="favicon.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="favicon.png" />
     
-    <!-- ===== SET DOCUMENT DOMAIN UNTUK COOKIE ===== -->
-    <script>
-      document.domain = 'singgatera.my.id';
-    </script>
+    <!-- ===== HAPUS document.domain ===== -->
     
     <link
       rel="stylesheet"
@@ -413,6 +410,7 @@
         const expires = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toUTCString();
         const value = encodeURIComponent(JSON.stringify(userData));
         document.cookie = `loginData=${value}; expires=${expires}; path=/; domain=.singgatera.my.id; SameSite=Lax; Secure`;
+        console.log('[Login] Cookie set:', document.cookie);
       }
 
       function deleteAuthCookie() {
@@ -505,12 +503,11 @@
       }
 
       // ============================================================
-      // ====== LOGIN HANDLER - PAKAI text/plain ======
+      // ====== LOGIN HANDLER ======
       // ============================================================
       loginForm.addEventListener('submit', async function(e) {
         e.preventDefault();
         
-        // Reset pesan
         errorMessage.classList.remove('show');
         successMessage.classList.remove('show');
         
@@ -525,8 +522,6 @@
         setLoading(true);
         
         try {
-          // === KIRIM SEBAGAI JSON DENGAN Content-Type: text/plain ===
-          // Ini TIDAK memicu preflight CORS karena bukan "application/json"
           const payload = {
             action: 'login',
             username: username,
@@ -624,6 +619,7 @@
         }
         
         console.log('[Login] Page loaded. Document.domain:', document.domain);
+        console.log('[Login] Cookies:', document.cookie);
       });
 
       // ============================================================
