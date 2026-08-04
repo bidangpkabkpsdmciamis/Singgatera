@@ -9,6 +9,12 @@
     <link rel="apple-touch-icon" sizes="180x180" href="favicon.png" />
     <link rel="icon" type="image/png" sizes="32x32" href="favicon.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="favicon.png" />
+    
+    <!-- ===== TAMBAHAN: SET DOCUMENT DOMAIN UNTUK COOKIE ===== -->
+    <script>
+      document.domain = 'singgatera.my.id';
+    </script>
+    
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
@@ -61,6 +67,11 @@
         border-radius: 50%;
         background: white;
         padding: 10px;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+      }
+      .logo-container img:hover {
+        transform: scale(1.05);
       }
       .site-title {
         font-size: 24px;
@@ -141,9 +152,14 @@
         display: flex;
         align-items: center;
         color: #666;
+        cursor: pointer;
       }
-      .remember-forgot input {
-        margin-right: 5px;
+      .remember-forgot input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+        margin-right: 8px;
+        cursor: pointer;
+        accent-color: #6e8efb;
       }
       .remember-forgot a {
         color: #6e8efb;
@@ -163,10 +179,35 @@
         font-weight: 600;
         cursor: pointer;
         transition: transform 0.3s, box-shadow 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
       }
-      .login-button:hover {
+      .login-button:hover:not(:disabled) {
         transform: translateY(-2px);
         box-shadow: 0 5px 15px rgba(110, 142, 251, 0.4);
+      }
+      .login-button:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+      }
+      .login-button .spinner {
+        display: none;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: #fff;
+        animation: spin 0.8s ease infinite;
+      }
+      .login-button.loading .spinner {
+        display: inline-block;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
       }
       .back-home-button {
         width: 100%;
@@ -199,12 +240,67 @@
       .signup-link a:hover {
         text-decoration: underline;
       }
+      /* ===== ERROR MESSAGE ===== */
+      .error-message {
+        display: none;
+        background: #fee2e2;
+        color: #dc2626;
+        padding: 12px 16px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        font-size: 14px;
+        border-left: 4px solid #dc2626;
+        align-items: center;
+        gap: 10px;
+      }
+      .error-message.show {
+        display: flex;
+      }
+      .error-message i {
+        font-size: 18px;
+      }
+      /* ===== SUCCESS MESSAGE ===== */
+      .success-message {
+        display: none;
+        background: #dcfce7;
+        color: #16a34a;
+        padding: 12px 16px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        font-size: 14px;
+        border-left: 4px solid #16a34a;
+        align-items: center;
+        gap: 10px;
+      }
+      .success-message.show {
+        display: flex;
+      }
       @media (max-width: 768px) {
         .login-container {
           flex-direction: column;
         }
         .login-left {
           padding: 30px;
+        }
+        .login-right {
+          padding: 30px 20px;
+        }
+      }
+      @media (max-width: 480px) {
+        .login-left h1 {
+          font-size: 22px;
+        }
+        .login-right h2 {
+          font-size: 20px;
+        }
+        .login-container {
+          border-radius: 10px;
+        }
+        .login-left {
+          padding: 20px;
+        }
+        .login-right {
+          padding: 20px 15px;
         }
       }
     </style>
@@ -214,7 +310,7 @@
       <div class="login-left">
         <div class="logo-container">
           <img
-            href="index.html"
+            onclick="location.href='https://www.singgatera.my.id/'"
             src="https://i.ibb.co.com/JWw8qHmM/logo-bkpsdm.png"
             alt="Logo BKPSDM"
           />
@@ -240,118 +336,363 @@
       <div class="login-right">
         <h2>Masuk ke Akun</h2>
         <p>Gunakan kredensial Anda</p>
+        
+        <!-- ===== ERROR & SUCCESS MESSAGE ===== -->
+        <div id="errorMessage" class="error-message">
+          <i class="fas fa-exclamation-circle"></i>
+          <span id="errorText">Login gagal. Periksa kembali kredensial Anda.</span>
+        </div>
+        <div id="successMessage" class="success-message">
+          <i class="fas fa-check-circle"></i>
+          <span id="successText">Login berhasil! Mengalihkan...</span>
+        </div>
+        
         <form class="login-form" id="loginForm">
           <div class="form-group">
-            <label for="username">Username atau NIP</label
-            ><input
+            <label for="username">
+              <i class="fas fa-user" style="margin-right: 8px; color: #6e8efb;"></i>
+              Username atau NIP
+            </label>
+            <input
               type="text"
               id="username"
               name="username"
               required
               placeholder="Masukkan username atau NIP"
+              autocomplete="username"
             />
           </div>
           <div class="form-group">
-            <label for="password">Password</label
-            ><input
+            <label for="password">
+              <i class="fas fa-lock" style="margin-right: 8px; color: #6e8efb;"></i>
+              Password
+            </label>
+            <input
               type="password"
               id="password"
               name="password"
               required
               placeholder="Masukkan password"
+              autocomplete="current-password"
             />
           </div>
           <div class="remember-forgot">
-            <label><input type="checkbox" name="remember" /> Ingat saya</label
-            ><a href="#">Lupa password?</a>
+            <label>
+              <input type="checkbox" name="remember" id="rememberMe" /> 
+              Ingat saya
+            </label>
+            <a href="#">Lupa password?</a>
           </div>
-          <button type="submit" class="login-button">Masuk</button>
+          <button type="submit" class="login-button" id="loginButton">
+            <span class="spinner"></span>
+            <span class="button-text"><i class="fas fa-sign-in-alt"></i> Masuk</span>
+          </button>
           <button
             type="button"
             class="back-home-button"
-            onclick="location.href='index.html'"
+            onclick="location.href='https://www.singgatera.my.id/'"
           >
-            Kembali ke Home
+            <i class="fas fa-arrow-left"></i> Kembali ke Home
           </button>
         </form>
         <div class="signup-link">
           Tidak punya akun?
-          <a href="https://wa.me/6282113568415">Hubungi Administrator</a>
+          <a href="https://wa.me/6282113568415" target="_blank">
+            <i class="fab fa-whatsapp" style="color: #25d366;"></i> Hubungi Administrator
+          </a>
         </div>
       </div>
     </div>
 
     <script>
-      // ** Ganti URL di bawah dengan URL Google Apps Script Anda setelah dipublikasikan. **
-      const scriptUrl =
-        "https://script.google.com/macros/s/AKfycbyHoP_UdQUBDQVOpL8q0F8XfXapfhyGbFRM2qC2NI47sAc_LhSxB4XlMAZvDTBr16C6Bg/exec";
+      // ============================================================
+      // ====== KONFIGURASI URL APPS SCRIPT ======
+      // ============================================================
+      const GAS_URL = "https://script.google.com/macros/s/AKfycbyHoP_UdQUBDQVOpL8q0F8XfXapfhyGbFRM2qC2NI47sAc_LhSxB4XlMAZvDTBr16C6Bg/exec";
+      
+      // ============================================================
+      // ====== COOKIE UTILITY FUNCTIONS ======
+      // ============================================================
+      function setAuthCookie(userData, days = 1) {
+        const expires = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toUTCString();
+        const value = encodeURIComponent(JSON.stringify(userData));
+        document.cookie = `loginData=${value}; expires=${expires}; path=/; domain=.singgatera.my.id; SameSite=Lax; Secure`;
+      }
 
-      document.addEventListener("DOMContentLoaded", function () {
-        document
-          .getElementById("loginForm")
-          .addEventListener("submit", async function (e) {
-            e.preventDefault();
+      function deleteAuthCookie() {
+        document.cookie = 'loginData=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.singgatera.my.id;';
+      }
 
-            const submitButton = this.querySelector(".login-button");
-            const originalText = submitButton.textContent;
-
-            // Tampilkan loading
-            submitButton.textContent = "Memproses...";
-            submitButton.disabled = true;
-
-            const username = document.getElementById("username").value;
-            const password = document.getElementById("password").value;
-
-            const data = {
-              action: "login",
-              username: username,
-              password: password,
-            };
-
+      // ============================================================
+      // ====== CEK APAKAH SUDAH LOGIN ======
+      // ============================================================
+      function checkAlreadyLoggedIn() {
+        // Cek dari cookie
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+          const [key, value] = cookie.trim().split('=');
+          if (key === 'loginData') {
             try {
-              const response = await fetch(scriptUrl, {
-                method: "POST",
-                body: JSON.stringify(data),
-              });
-
-              if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+              const userData = JSON.parse(decodeURIComponent(value));
+              const loginTime = new Date(userData.loginTime);
+              const currentTime = new Date();
+              const hoursDiff = (currentTime - loginTime) / (1000 * 60 * 60);
+              
+              if (hoursDiff <= 24 && userData.username) {
+                // Sudah login, redirect ke home
+                window.location.href = 'https://www.singgatera.my.id/';
+                return true;
               }
-
-              const result = await response.json();
-
-              if (result.status === "success") {
-                // Simpan data login ke localStorage
-                const loginData = {
-                  name: result.name,
-                  username: result.username, // Simpan username/NIP
-                  loginTime: new Date().toISOString(),
-                };
-
-                localStorage.setItem("loginData", JSON.stringify(loginData));
-
-                alert("Login berhasil! Selamat datang, " + result.name);
-                window.location.href = "index.html";
-              } else {
-                alert("Login gagal: " + result.message);
-              }
-            } catch (error) {
-              alert("Login gagal. Terdapat kesalahan: " + error.message);
-              console.error("Error:", error);
-            } finally {
-              // Reset button
-              submitButton.textContent = originalText;
-              submitButton.disabled = false;
+            } catch (e) {}
+          }
+        }
+        
+        // Cek dari localStorage (fallback)
+        const localData = localStorage.getItem('loginData');
+        if (localData) {
+          try {
+            const userData = JSON.parse(localData);
+            const loginTime = new Date(userData.loginTime);
+            const currentTime = new Date();
+            const hoursDiff = (currentTime - loginTime) / (1000 * 60 * 60);
+            
+            if (hoursDiff <= 24 && userData.username) {
+              // Sync ke cookie
+              setAuthCookie(userData);
+              window.location.href = 'https://www.singgatera.my.id/';
+              return true;
             }
+          } catch (e) {}
+        }
+        
+        return false;
+      }
+
+      // ============================================================
+      // ====== DOM ELEMENTS ======
+      // ============================================================
+      const loginForm = document.getElementById('loginForm');
+      const loginButton = document.getElementById('loginButton');
+      const buttonText = loginButton.querySelector('.button-text');
+      const spinner = loginButton.querySelector('.spinner');
+      const errorMessage = document.getElementById('errorMessage');
+      const errorText = document.getElementById('errorText');
+      const successMessage = document.getElementById('successMessage');
+      const successText = document.getElementById('successText');
+      const usernameInput = document.getElementById('username');
+      const passwordInput = document.getElementById('password');
+      const rememberMe = document.getElementById('rememberMe');
+
+      // ============================================================
+      // ====== TAMPILKAN PESAN ERROR ======
+      // ============================================================
+      function showError(message) {
+        errorText.textContent = message;
+        errorMessage.classList.add('show');
+        successMessage.classList.remove('show');
+      }
+
+      function hideError() {
+        errorMessage.classList.remove('show');
+      }
+
+      function showSuccess(message) {
+        successText.textContent = message;
+        successMessage.classList.add('show');
+        errorMessage.classList.remove('show');
+      }
+
+      function hideSuccess() {
+        successMessage.classList.remove('show');
+      }
+
+      // ============================================================
+      // ====== SET LOADING STATE ======
+      // ============================================================
+      function setLoading(isLoading) {
+        if (isLoading) {
+          loginButton.classList.add('loading');
+          loginButton.disabled = true;
+          buttonText.textContent = 'Memproses...';
+        } else {
+          loginButton.classList.remove('loading');
+          loginButton.disabled = false;
+          buttonText.innerHTML = '<i class="fas fa-sign-in-alt"></i> Masuk';
+        }
+      }
+
+      // ============================================================
+      // ====== LOGIN HANDLER ======
+      // ============================================================
+      loginForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        // Reset pesan
+        hideError();
+        hideSuccess();
+        
+        // Ambil nilai input
+        const username = usernameInput.value.trim();
+        const password = passwordInput.value.trim();
+        
+        // Validasi input
+        if (!username || !password) {
+          showError('Harap isi Username/NIP dan Password.');
+          return;
+        }
+        
+        // Tampilkan loading
+        setLoading(true);
+        
+        const data = {
+          action: 'login',
+          username: username,
+          password: password
+        };
+        
+        try {
+          const response = await fetch(GAS_URL, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
           });
+          
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          
+          const result = await response.json();
+          console.log('[Login] Response:', result);
+          
+          if (result.status === 'success') {
+            // === LOGIN SUKSES ===
+            
+            // Data user untuk disimpan
+            const userData = {
+              username: result.username || username,
+              name: result.name || 'ASN',
+              email: result.email || '',
+              loginTime: new Date().toISOString(),
+              loginSuccess: true
+            };
+            
+            // 1. Simpan ke COOKIE (cross-subdomain)
+            setAuthCookie(userData);
+            
+            // 2. Simpan ke LOCALSTORAGE (fallback)
+            localStorage.setItem('loginData', JSON.stringify(userData));
+            
+            // Tampilkan pesan sukses
+            showSuccess('Login berhasil! Selamat datang, ' + userData.name);
+            
+            // Redirect setelah delay
+            setTimeout(() => {
+              window.location.href = 'https://www.singgatera.my.id/';
+            }, 1500);
+            
+          } else {
+            // Login gagal
+            showError('Login gagal: ' + (result.message || 'Periksa kembali kredensial Anda.'));
+            setLoading(false);
+          }
+          
+        } catch (error) {
+          console.error('[Login] Error:', error);
+          showError('Terjadi kesalahan: ' + error.message);
+          setLoading(false);
+        }
       });
 
-      // Function untuk testing login
-      function testLogin() {
-        document.getElementById("username").value = "196512101987031001";
-        document.getElementById("password").value = "password123";
-        document.getElementById("loginForm").dispatchEvent(new Event("submit"));
+      // ============================================================
+      // ====== AUTO-FILL DARI REMEMBER ME ======
+      // ============================================================
+      function loadRemembered() {
+        const remembered = localStorage.getItem('rememberedUser');
+        if (remembered) {
+          try {
+            const data = JSON.parse(remembered);
+            usernameInput.value = data.username || '';
+            if (data.remember) {
+              rememberMe.checked = true;
+            }
+          } catch (e) {}
+        }
       }
+
+      // ============================================================
+      // ====== INITIALIZE ======
+      // ============================================================
+      document.addEventListener('DOMContentLoaded', function() {
+        // Cek apakah sudah login
+        if (checkAlreadyLoggedIn()) {
+          return; // Sudah redirect
+        }
+        
+        // Load remembered username
+        loadRemembered();
+        
+        // Auto-fokus ke input username
+        if (!usernameInput.value) {
+          usernameInput.focus();
+        }
+        
+        console.log('[Login] Page loaded. Document.domain:', document.domain);
+        console.log('[Login] Cookie:', document.cookie);
+      });
+
+      // ============================================================
+      // ====== REMEMBER ME ======
+      // ============================================================
+      rememberMe.addEventListener('change', function() {
+        if (this.checked && usernameInput.value) {
+          localStorage.setItem('rememberedUser', JSON.stringify({
+            username: usernameInput.value,
+            remember: true
+          }));
+        } else {
+          localStorage.removeItem('rememberedUser');
+        }
+      });
+
+      usernameInput.addEventListener('change', function() {
+        if (rememberMe.checked && this.value) {
+          localStorage.setItem('rememberedUser', JSON.stringify({
+            username: this.value,
+            remember: true
+          }));
+        }
+      });
+
+      // ============================================================
+      // ====== ENTER KEY SUPPORT ======
+      // ============================================================
+      passwordInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          loginForm.dispatchEvent(new Event('submit'));
+        }
+      });
+
+      usernameInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && usernameInput.value) {
+          passwordInput.focus();
+        }
+      });
+
+      // ============================================================
+      // ====== FUNGSI TESTING (BISA DIHAPUS DI PRODUCTION) ======
+      // ============================================================
+      function testLogin() {
+        document.getElementById('username').value = '196512101987031001';
+        document.getElementById('password').value = 'password123';
+        document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+      }
+      
+      // Expose untuk testing di console
+      window.testLogin = testLogin;
+      
+      console.log('[Login] Script loaded. Test login dengan testLogin()');
     </script>
   </body>
 </html>
