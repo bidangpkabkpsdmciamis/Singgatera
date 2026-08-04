@@ -366,5 +366,53 @@ if (result.status === "success") {
         document.getElementById("loginForm").dispatchEvent(new Event("submit"));
       }
     </script>
+  
+  // ===== CEK REDIRECT DARI PROFILE =====
+document.addEventListener('DOMContentLoaded', function() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const redirectUrl = urlParams.get('redirect');
+  
+  if (redirectUrl) {
+    // Simpan redirect URL untuk digunakan setelah login
+    sessionStorage.setItem('redirectAfterLogin', redirectUrl);
+    console.log('[Login] Akan redirect ke:', redirectUrl);
+  }
+  
+  // Jika ada redirect, ubah perilaku form submit
+  const form = document.getElementById('loginForm');
+  const originalSubmit = form.onsubmit;
+  
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    // ... kode login yang sudah ada ...
+    
+    // Setelah login berhasil
+    if (result.status === "success") {
+      const loginData = {
+        name: result.name,
+        username: result.username,
+        loginTime: new Date().toISOString()
+      };
+      
+      localStorage.setItem("loginData", JSON.stringify(loginData));
+      
+      // Cek apakah ada redirect URL
+      const redirectAfter = sessionStorage.getItem('redirectAfterLogin');
+      if (redirectAfter) {
+        sessionStorage.removeItem('redirectAfterLogin');
+        // Kirim data login via URL parameter
+        const encodedData = encodeURIComponent(JSON.stringify(loginData));
+        const separator = redirectAfter.includes('?') ? '&' : '?';
+        window.location.href = `${redirectAfter}${separator}loginData=${encodedData}`;
+      } else {
+        alert("Login berhasil! Selamat datang, " + result.name);
+        window.location.href = "index.html";
+      }
+    } else {
+      alert("Login gagal: " + result.message);
+    }
+  });
+});
   </body>
 </html>
