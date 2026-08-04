@@ -5,16 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Login SINGGATERA</title>
     <link rel="icon" type="image/png" href="favicon.png" />
+    <!-- Alternatif untuk berbagai perangkat -->
     <link rel="apple-touch-icon" sizes="180x180" href="favicon.png" />
     <link rel="icon" type="image/png" sizes="32x32" href="favicon.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="favicon.png" />
-    
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
     <style>
-      /* CSS SAMA SEPERTI SEBELUMNYA - TIDAK DIUBAH */
       * {
         margin: 0;
         padding: 0;
@@ -62,11 +61,6 @@
         border-radius: 50%;
         background: white;
         padding: 10px;
-        cursor: pointer;
-        transition: transform 0.3s ease;
-      }
-      .logo-container img:hover {
-        transform: scale(1.05);
       }
       .site-title {
         font-size: 24px;
@@ -147,14 +141,9 @@
         display: flex;
         align-items: center;
         color: #666;
-        cursor: pointer;
       }
-      .remember-forgot input[type="checkbox"] {
-        width: 16px;
-        height: 16px;
-        margin-right: 8px;
-        cursor: pointer;
-        accent-color: #6e8efb;
+      .remember-forgot input {
+        margin-right: 5px;
       }
       .remember-forgot a {
         color: #6e8efb;
@@ -174,35 +163,10 @@
         font-weight: 600;
         cursor: pointer;
         transition: transform 0.3s, box-shadow 0.3s;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
       }
-      .login-button:hover:not(:disabled) {
+      .login-button:hover {
         transform: translateY(-2px);
         box-shadow: 0 5px 15px rgba(110, 142, 251, 0.4);
-      }
-      .login-button:disabled {
-        opacity: 0.7;
-        cursor: not-allowed;
-      }
-      .login-button .spinner {
-        display: none;
-        width: 20px;
-        height: 20px;
-        border: 3px solid rgba(255, 255, 255, 0.3);
-        border-radius: 50%;
-        border-top-color: #fff;
-        animation: spin 0.8s ease infinite;
-      }
-      .login-button.loading .spinner {
-        display: inline-block;
-      }
-      @keyframes spin {
-        to {
-          transform: rotate(360deg);
-        }
       }
       .back-home-button {
         width: 100%;
@@ -235,65 +199,12 @@
       .signup-link a:hover {
         text-decoration: underline;
       }
-      .error-message {
-        display: none;
-        background: #fee2e2;
-        color: #dc2626;
-        padding: 12px 16px;
-        border-radius: 8px;
-        margin-bottom: 20px;
-        font-size: 14px;
-        border-left: 4px solid #dc2626;
-        align-items: center;
-        gap: 10px;
-      }
-      .error-message.show {
-        display: flex;
-      }
-      .error-message i {
-        font-size: 18px;
-      }
-      .success-message {
-        display: none;
-        background: #dcfce7;
-        color: #16a34a;
-        padding: 12px 16px;
-        border-radius: 8px;
-        margin-bottom: 20px;
-        font-size: 14px;
-        border-left: 4px solid #16a34a;
-        align-items: center;
-        gap: 10px;
-      }
-      .success-message.show {
-        display: flex;
-      }
       @media (max-width: 768px) {
         .login-container {
           flex-direction: column;
         }
         .login-left {
           padding: 30px;
-        }
-        .login-right {
-          padding: 30px 20px;
-        }
-      }
-      @media (max-width: 480px) {
-        .login-left h1 {
-          font-size: 22px;
-        }
-        .login-right h2 {
-          font-size: 20px;
-        }
-        .login-container {
-          border-radius: 10px;
-        }
-        .login-left {
-          padding: 20px;
-        }
-        .login-right {
-          padding: 20px 15px;
         }
       }
     </style>
@@ -303,7 +214,7 @@
       <div class="login-left">
         <div class="logo-container">
           <img
-            onclick="location.href='https://www.singgatera.my.id/'"
+            href="index.html"
             src="https://i.ibb.co.com/JWw8qHmM/logo-bkpsdm.png"
             alt="Logo BKPSDM"
           />
@@ -329,276 +240,118 @@
       <div class="login-right">
         <h2>Masuk ke Akun</h2>
         <p>Gunakan kredensial Anda</p>
-        
-        <div id="errorMessage" class="error-message">
-          <i class="fas fa-exclamation-circle"></i>
-          <span id="errorText">Login gagal. Periksa kembali kredensial Anda.</span>
-        </div>
-        <div id="successMessage" class="success-message">
-          <i class="fas fa-check-circle"></i>
-          <span id="successText">Login berhasil! Mengalihkan...</span>
-        </div>
-        
         <form class="login-form" id="loginForm">
           <div class="form-group">
-            <label for="username">
-              <i class="fas fa-user" style="margin-right: 8px; color: #6e8efb;"></i>
-              Username atau NIP
-            </label>
-            <input
+            <label for="username">Username atau NIP</label
+            ><input
               type="text"
               id="username"
               name="username"
               required
               placeholder="Masukkan username atau NIP"
-              autocomplete="username"
             />
           </div>
           <div class="form-group">
-            <label for="password">
-              <i class="fas fa-lock" style="margin-right: 8px; color: #6e8efb;"></i>
-              Password
-            </label>
-            <input
+            <label for="password">Password</label
+            ><input
               type="password"
               id="password"
               name="password"
               required
               placeholder="Masukkan password"
-              autocomplete="current-password"
             />
           </div>
           <div class="remember-forgot">
-            <label>
-              <input type="checkbox" name="remember" id="rememberMe" /> 
-              Ingat saya
-            </label>
-            <a href="#">Lupa password?</a>
+            <label><input type="checkbox" name="remember" /> Ingat saya</label
+            ><a href="#">Lupa password?</a>
           </div>
-          <button type="submit" class="login-button" id="loginButton">
-            <span class="spinner"></span>
-            <span class="button-text"><i class="fas fa-sign-in-alt"></i> Masuk</span>
-          </button>
+          <button type="submit" class="login-button">Masuk</button>
           <button
             type="button"
             class="back-home-button"
-            onclick="location.href='https://www.singgatera.my.id/'"
+            onclick="location.href='index.html'"
           >
-            <i class="fas fa-arrow-left"></i> Kembali ke Home
+            Kembali ke Home
           </button>
         </form>
         <div class="signup-link">
           Tidak punya akun?
-          <a href="https://wa.me/6282113568415" target="_blank">
-            <i class="fab fa-whatsapp" style="color: #25d366;"></i> Hubungi Administrator
-          </a>
+          <a href="https://wa.me/6282113568415">Hubungi Administrator</a>
         </div>
       </div>
     </div>
 
     <script>
-      // ============================================================
-      // ====== KONFIGURASI URL APPS SCRIPT ======
-      // ============================================================
-      const GAS_URL = "https://script.google.com/macros/s/AKfycby6ZesA7-ucTDue5wg92abdEQNQr8po_w6legTcOg7LHnzSdfQi1t7vqAz2X7oIiyOvbw/exec";
-      
-      console.log('[Login] Using GAS_URL:', GAS_URL);
+      // ** Ganti URL di bawah dengan URL Google Apps Script Anda setelah dipublikasikan. **
+      const scriptUrl =
+        "https://script.google.com/macros/s/AKfycbyHoP_UdQUBDQVOpL8q0F8XfXapfhyGbFRM2qC2NI47sAc_LhSxB4XlMAZvDTBr16C6Bg/exec";
 
-      // ============================================================
-      // ====== DOM ELEMENTS ======
-      // ============================================================
-      const loginForm = document.getElementById('loginForm');
-      const loginButton = document.getElementById('loginButton');
-      const buttonText = loginButton.querySelector('.button-text');
-      const spinner = loginButton.querySelector('.spinner');
-      const errorMessage = document.getElementById('errorMessage');
-      const errorText = document.getElementById('errorText');
-      const successMessage = document.getElementById('successMessage');
-      const successText = document.getElementById('successText');
-      const usernameInput = document.getElementById('username');
-      const passwordInput = document.getElementById('password');
-      const rememberMe = document.getElementById('rememberMe');
+      document.addEventListener("DOMContentLoaded", function () {
+        document
+          .getElementById("loginForm")
+          .addEventListener("submit", async function (e) {
+            e.preventDefault();
 
-      // ============================================================
-      // ====== TAMPILKAN PESAN ======
-      // ============================================================
-      function showError(message) {
-        errorText.textContent = message;
-        errorMessage.classList.add('show');
-        successMessage.classList.remove('show');
-      }
+            const submitButton = this.querySelector(".login-button");
+            const originalText = submitButton.textContent;
 
-      function showSuccess(message) {
-        successText.textContent = message;
-        successMessage.classList.add('show');
-        errorMessage.classList.remove('show');
-      }
+            // Tampilkan loading
+            submitButton.textContent = "Memproses...";
+            submitButton.disabled = true;
 
-      function setLoading(isLoading) {
-        if (isLoading) {
-          loginButton.classList.add('loading');
-          loginButton.disabled = true;
-          buttonText.textContent = 'Memproses...';
-        } else {
-          loginButton.classList.remove('loading');
-          loginButton.disabled = false;
-          buttonText.innerHTML = '<i class="fas fa-sign-in-alt"></i> Masuk';
-        }
-      }
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
 
-      // ============================================================
-      // ====== SET COOKIE ======
-      // ============================================================
-      function setAuthCookie(userData, days = 1) {
-        try {
-          const expires = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toUTCString();
-          const value = encodeURIComponent(JSON.stringify(userData));
-          document.cookie = `loginData=${value}; expires=${expires}; path=/; domain=.singgatera.my.id; SameSite=Lax`;
-          console.log('[Login] Cookie set:', document.cookie);
-        } catch (e) {
-          console.error('[Login] Error setting cookie:', e);
-        }
-      }
-
-      // ============================================================
-      // ====== LOGIN HANDLER ======
-      // ============================================================
-      loginForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        errorMessage.classList.remove('show');
-        successMessage.classList.remove('show');
-        
-        const username = usernameInput.value.trim();
-        const password = passwordInput.value.trim();
-        
-        if (!username || !password) {
-          showError('Harap isi Username/NIP dan Password.');
-          return;
-        }
-        
-        setLoading(true);
-        
-        try {
-          console.log('[Login] Sending login request for:', username);
-          
-          const payload = {
-            action: 'login',
-            username: username,
-            password: password
-          };
-          
-          const response = await fetch(GAS_URL, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'text/plain',
-            },
-            body: JSON.stringify(payload)
-          });
-          
-          console.log('[Login] Response status:', response.status);
-          
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          
-          const result = await response.json();
-          console.log('[Login] Response data:', result);
-          
-          if (result.status === 'success') {
-            const userData = {
-              username: result.username || username,
-              name: result.name || 'ASN',
-              email: result.email || '',
-              loginTime: new Date().toISOString(),
-              loginSuccess: true
+            const data = {
+              action: "login",
+              username: username,
+              password: password,
             };
-            
-            // === SIMPAN KE SEMUA TEMPAT ===
-            
-            // 1. localStorage (untuk domain yang sama)
-            localStorage.setItem('loginData', JSON.stringify(userData));
-            
-            // 2. sessionStorage (backup)
-            sessionStorage.setItem('loginData', JSON.stringify(userData));
-            
-            // 3. Cookie (untuk cross-subdomain)
-            setAuthCookie(userData);
-            
-            // 4. Query parameter (untuk redirect ke profile)
-            const token = encodeURIComponent(JSON.stringify(userData));
-            
-            if (rememberMe.checked) {
-              localStorage.setItem('rememberedUser', JSON.stringify({
-                username: username,
-                remember: true
-              }));
+
+            try {
+              const response = await fetch(scriptUrl, {
+                method: "POST",
+                body: JSON.stringify(data),
+              });
+
+              if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+              }
+
+              const result = await response.json();
+
+              if (result.status === "success") {
+                // Simpan data login ke localStorage
+                const loginData = {
+                  name: result.name,
+                  username: result.username, // Simpan username/NIP
+                  loginTime: new Date().toISOString(),
+                };
+
+                localStorage.setItem("loginData", JSON.stringify(loginData));
+
+                alert("Login berhasil! Selamat datang, " + result.name);
+                window.location.href = "index.html";
+              } else {
+                alert("Login gagal: " + result.message);
+              }
+            } catch (error) {
+              alert("Login gagal. Terdapat kesalahan: " + error.message);
+              console.error("Error:", error);
+            } finally {
+              // Reset button
+              submitButton.textContent = originalText;
+              submitButton.disabled = false;
             }
-            
-            showSuccess('Login berhasil! Selamat datang, ' + userData.name);
-            
-            // Redirect dengan query parameter token
-            setTimeout(() => {
-              const redirectUrl = `https://profile.singgatera.my.id/?token=${token}`;
-              console.log('[Login] Redirecting to:', redirectUrl);
-              window.location.href = redirectUrl;
-            }, 1500);
-            
-          } else {
-            showError('Login gagal: ' + (result.message || 'Periksa kembali kredensial Anda.'));
-            setLoading(false);
-          }
-          
-        } catch (error) {
-          console.error('[Login] Error:', error);
-          showError('Terjadi kesalahan: ' + error.message);
-          setLoading(false);
-        }
+          });
       });
 
-      // ============================================================
-      // ====== LOAD REMEMBERED USER ======
-      // ============================================================
-      function loadRemembered() {
-        const remembered = localStorage.getItem('rememberedUser');
-        if (remembered) {
-          try {
-            const data = JSON.parse(remembered);
-            usernameInput.value = data.username || '';
-            if (data.remember) {
-              rememberMe.checked = true;
-            }
-          } catch (e) {}
-        }
-      }
-
-      // ============================================================
-      // ====== INITIALIZE ======
-      // ============================================================
-      document.addEventListener('DOMContentLoaded', function() {
-        loadRemembered();
-        
-        if (!usernameInput.value) {
-          usernameInput.focus();
-        }
-        
-        console.log('[Login] Page loaded.');
-        console.log('[Login] Document.domain:', document.domain);
-        console.log('[Login] Cookies:', document.cookie);
-        console.log('[Login] localStorage:', localStorage.getItem('loginData'));
-      });
-
-      // ============================================================
-      // ====== TESTING ======
-      // ============================================================
+      // Function untuk testing login
       function testLogin() {
-        document.getElementById('username').value = '196512101987031001';
-        document.getElementById('password').value = 'password123';
-        document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+        document.getElementById("username").value = "196512101987031001";
+        document.getElementById("password").value = "password123";
+        document.getElementById("loginForm").dispatchEvent(new Event("submit"));
       }
-      
-      window.testLogin = testLogin;
-      console.log('[Login] Script loaded. Test login dengan testLogin()');
     </script>
   </body>
 </html>
