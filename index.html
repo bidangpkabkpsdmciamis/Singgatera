@@ -7,12 +7,6 @@
       SINGGATERA - Sistem Informasi Pengembangan Kompetensi Aparatur
     </title>
     <link rel="icon" type="image/png" href="favicon.png" />
-    
-    <!-- ===== TAMBAHAN: SET DOCUMENT DOMAIN UNTUK COOKIE ===== -->
-    <script>
-      document.domain = 'singgatera.my.id';
-    </script>
-    
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
@@ -759,7 +753,7 @@
         margin: 0 auto;
       }
 
-      /* ===== TOMBOL AKSES CEPAT ===== */
+      /* Tombol Akses Cepat - hanya muncul saat login */
       .quick-access-btn {
         margin-top: 30px;
         display: none;
@@ -767,12 +761,6 @@
 
       .quick-access-btn.visible {
         display: block;
-        animation: fadeIn 0.5s ease;
-      }
-
-      /* ===== HIDDEN SECTION ===== */
-      .hidden-section {
-        display: none !important;
       }
 
       /* ===== ABOUT SECTION ===== */
@@ -1095,22 +1083,6 @@
         transform: translateY(-5px);
       }
 
-      /* ===== ANIMATIONS ===== */
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-          transform: translateY(20px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      .fade-in {
-        animation: fadeIn 0.6s ease forwards;
-      }
-
       /* ===== RESPONSIVE DESIGN ===== */
       @media (max-width: 1200px) {
         .hero-container,
@@ -1255,13 +1227,33 @@
           display: none;
         }
       }
+
+      /* ===== ANIMATIONS ===== */
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .fade-in {
+        animation: fadeIn 0.6s ease forwards;
+      }
+
+      .hidden-section {
+        display: none !important;
+      }
     </style>
   </head>
   <body>
     <!-- ===== HEADER ===== -->
     <header class="header" id="header">
       <div class="container header-container">
-        <a href="https://www.singgatera.my.id/" class="logo">
+        <a href="index.html" class="logo">
           <img
             src="https://i.ibb.co.com/JWw8qHmM/logo-bkpsdm.png"
             alt="BKPSDM Logo"
@@ -1275,7 +1267,7 @@
 
         <nav class="nav" id="nav">
           <ul class="nav-links">
-            <li><a href="https://www.singgatera.my.id/" class="nav-link active">Home</a></li>
+            <li><a href="index.html" class="nav-link active">Home</a></li>
             <li><a href="ksf.html" class="nav-link">Konsultasi & Saran</a></li>
             <li><a href="informasi.html" class="nav-link">Informasi</a></li>
           </ul>
@@ -1305,7 +1297,7 @@
                   <p class="user-email" id="dropdownEmail">-</p>
                 </div>
                 <div class="dropdown-links">
-                  <a href="https://www.profile.singgatera.my.id/" class="dropdown-link">
+                  <a href="https://bidangpkabkpsdmciamis.github.io/ProfileASNCiamis/" class="dropdown-link">
                     <i class="fas fa-user-circle"></i>
                     <span>Profil Saya</span>
                   </a>
@@ -1654,7 +1646,7 @@
             <h4>Link Cepat</h4>
             <ul>
               <li>
-                <a href="https://www.singgatera.my.id/"><i class="fas fa-home"></i> Beranda</a>
+                <a href="index.html"><i class="fas fa-home"></i> Beranda</a>
               </li>
               <li>
                 <a href="pelatihan.html"
@@ -1853,83 +1845,56 @@
         }
       }
 
-      // ====== CHECK LOGIN STATUS (DENGAN COOKIE SUPPORT) ======
+      // ====== CHECK LOGIN STATUS ======
       function checkLoginStatus() {
-        // 1. Cek dari cookie dulu (cross-subdomain)
-        let userData = null;
-        
-        const cookies = document.cookie.split(';');
-        for (let cookie of cookies) {
-          const [key, value] = cookie.trim().split('=');
-          if (key === 'loginData') {
-            try {
-              userData = JSON.parse(decodeURIComponent(value));
-              break;
-            } catch (e) {}
-          }
-        }
-        
-        // 2. Jika tidak ada di cookie, cek localStorage (fallback)
-        if (!userData) {
-          const localData = localStorage.getItem('loginData');
-          if (localData) {
-            try {
-              userData = JSON.parse(localData);
-              // Sync ke cookie untuk akses lintas subdomain
-              if (userData && userData.username) {
-                const expires = new Date(Date.now() + 24 * 60 * 60 * 1000).toUTCString();
-                document.cookie = `loginData=${encodeURIComponent(JSON.stringify(userData))}; expires=${expires}; path=/; domain=.singgatera.my.id; SameSite=Lax; Secure`;
-              }
-            } catch (e) {}
-          }
-        }
+        const loginData = localStorage.getItem("loginData");
 
-        if (userData) {
+        if (loginData) {
+          const userData = JSON.parse(loginData);
           const loginTime = new Date(userData.loginTime);
           const currentTime = new Date();
-          const hoursDiff = (currentTime - loginTime) / (1000 * 60 * 60);
 
-          // Check if login is still valid (24 hours)
-          if (hoursDiff <= 24) {
+          // Check if login is still within the same day
+          const isSameDay =
+            loginTime.getDate() === currentTime.getDate() &&
+            loginTime.getMonth() === currentTime.getMonth() &&
+            loginTime.getFullYear() === currentTime.getFullYear();
+
+          if (isSameDay) {
             // User is logged in
-            userName.textContent = userData.name || 'ASN';
-            dropdownName.textContent = userData.name || 'ASN';
-            dropdownEmail.textContent = userData.email || userData.username || '-';
-            loginBtn.innerHTML = '<i class="fas fa-user-circle"></i> Profil Saya';
-            loginBtn.href = 'https://profile.singgatera.my.id/';
+            userName.textContent = userData.name;
+            dropdownName.textContent = userData.name;
+            dropdownEmail.textContent =
+              userData.email || userData.username || "-";
+            loginBtn.innerHTML =
+              '<i class="fas fa-user-circle"></i> Profil Saya';
+            loginBtn.href = "profile.html";
 
             // Show services & quick access
             toggleServices(true);
             return;
           } else {
             // Login expired
-            localStorage.removeItem('loginData');
-            document.cookie = 'loginData=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.singgatera.my.id;';
+            localStorage.removeItem("loginData");
           }
         }
 
         // User is not logged in
-        userName.textContent = 'Guest';
-        dropdownName.textContent = 'Guest';
-        dropdownEmail.textContent = 'Silakan login untuk akses lengkap';
+        userName.textContent = "Guest";
+        dropdownName.textContent = "Guest";
+        dropdownEmail.textContent = "Silakan login untuk akses lengkap";
         loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Masuk / Login';
-        loginBtn.href = 'login.html';
+        loginBtn.href = "login.html";
 
         // Hide services & quick access
         toggleServices(false);
       }
 
       // ====== LOGOUT FUNCTION ======
-      logoutBtn.addEventListener('click', (e) => {
+      logoutBtn.addEventListener("click", (e) => {
         e.preventDefault();
-        
-        // Hapus dari localStorage
-        localStorage.removeItem('loginData');
-        
-        // Hapus dari cookie
-        document.cookie = 'loginData=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.singgatera.my.id;';
-        
-        alert('Anda telah keluar dari sistem.');
+        localStorage.removeItem("loginData");
+        alert("Anda telah keluar dari sistem.");
         window.location.reload();
       });
 
@@ -1959,7 +1924,7 @@
 
       function animateCounter(element, target) {
         let current = 0;
-        const increment = target / 50;
+        const increment = target / 50; // 50 steps for animation
         const timer = setInterval(() => {
           current += increment;
           if (current >= target) {
@@ -2002,6 +1967,7 @@
             const query = searchInput.value.trim();
             if (query) {
               alert(`Melakukan pencarian untuk: "${query}"`);
+              // In production: window.location.href = `search.html?q=${encodeURIComponent(query)}`;
             }
           }
         });
@@ -2009,19 +1975,6 @@
 
       // ====== INITIALIZE ======
       document.addEventListener("DOMContentLoaded", () => {
-        // ====== CEK LOGIN SAAT HALAMAN DIMUAT ======
-        // Pastikan cookie tersinkronisasi dengan localStorage
-        const cookieData = document.cookie.split(';').find(c => c.trim().startsWith('loginData='));
-        if (cookieData) {
-          try {
-            const value = cookieData.split('=')[1];
-            const userData = JSON.parse(decodeURIComponent(value));
-            if (userData && userData.username) {
-              localStorage.setItem('loginData', JSON.stringify(userData));
-            }
-          } catch (e) {}
-        }
-
         checkLoginStatus();
         fetchStats();
         animateOnScroll();
