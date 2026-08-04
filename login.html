@@ -9,13 +9,12 @@
     <link rel="icon" type="image/png" sizes="32x32" href="favicon.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="favicon.png" />
     
-    <!-- ===== HAPUS document.domain ===== -->
-    
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
     <style>
+      /* CSS SAMA SEPERTI SEBELUMNYA - TIDAK DIUBAH */
       * {
         margin: 0;
         padding: 0;
@@ -401,64 +400,9 @@
       // ============================================================
       // ====== KONFIGURASI URL APPS SCRIPT ======
       // ============================================================
-      const GAS_URL = "https://script.google.com/macros/s/AKfycbyHoP_UdQUBDQVOpL8q0F8XfXapfhyGbFRM2qC2NI47sAc_LhSxB4XlMAZvDTBr16C6Bg/exec";
+      const GAS_URL = "https://script.google.com/macros/s/AKfycby6ZesA7-ucTDue5wg92abdEQNQr8po_w6legTcOg7LHnzSdfQi1t7vqAz2X7oIiyOvbw/exec";
       
-      // ============================================================
-      // ====== COOKIE UTILITY FUNCTIONS ======
-      // ============================================================
-      function setAuthCookie(userData, days = 1) {
-        const expires = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toUTCString();
-        const value = encodeURIComponent(JSON.stringify(userData));
-        document.cookie = `loginData=${value}; expires=${expires}; path=/; domain=.singgatera.my.id; SameSite=Lax; Secure`;
-        console.log('[Login] Cookie set:', document.cookie);
-      }
-
-      function deleteAuthCookie() {
-        document.cookie = 'loginData=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.singgatera.my.id;';
-      }
-
-      // ============================================================
-      // ====== CEK APAKAH SUDAH LOGIN ======
-      // ============================================================
-      function checkAlreadyLoggedIn() {
-        // Cek dari cookie
-        const cookies = document.cookie.split(';');
-        for (let cookie of cookies) {
-          const [key, value] = cookie.trim().split('=');
-          if (key === 'loginData') {
-            try {
-              const userData = JSON.parse(decodeURIComponent(value));
-              const loginTime = new Date(userData.loginTime);
-              const currentTime = new Date();
-              const hoursDiff = (currentTime - loginTime) / (1000 * 60 * 60);
-              
-              if (hoursDiff <= 24 && userData.username) {
-                window.location.href = 'https://www.singgatera.my.id/';
-                return true;
-              }
-            } catch (e) {}
-          }
-        }
-        
-        // Cek dari localStorage (fallback)
-        const localData = localStorage.getItem('loginData');
-        if (localData) {
-          try {
-            const userData = JSON.parse(localData);
-            const loginTime = new Date(userData.loginTime);
-            const currentTime = new Date();
-            const hoursDiff = (currentTime - loginTime) / (1000 * 60 * 60);
-            
-            if (hoursDiff <= 24 && userData.username) {
-              setAuthCookie(userData);
-              window.location.href = 'https://www.singgatera.my.id/';
-              return true;
-            }
-          } catch (e) {}
-        }
-        
-        return false;
-      }
+      console.log('[Login] Using GAS_URL:', GAS_URL);
 
       // ============================================================
       // ====== DOM ELEMENTS ======
@@ -503,6 +447,20 @@
       }
 
       // ============================================================
+      // ====== SET COOKIE ======
+      // ============================================================
+      function setAuthCookie(userData, days = 1) {
+        try {
+          const expires = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toUTCString();
+          const value = encodeURIComponent(JSON.stringify(userData));
+          document.cookie = `loginData=${value}; expires=${expires}; path=/; domain=.singgatera.my.id; SameSite=Lax`;
+          console.log('[Login] Cookie set:', document.cookie);
+        } catch (e) {
+          console.error('[Login] Error setting cookie:', e);
+        }
+      }
+
+      // ============================================================
       // ====== LOGIN HANDLER ======
       // ============================================================
       loginForm.addEventListener('submit', async function(e) {
@@ -522,6 +480,8 @@
         setLoading(true);
         
         try {
+          console.log('[Login] Sending login request for:', username);
+          
           const payload = {
             action: 'login',
             username: username,
@@ -536,12 +496,14 @@
             body: JSON.stringify(payload)
           });
           
+          console.log('[Login] Response status:', response.status);
+          
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
           
           const result = await response.json();
-          console.log('[Login] Response:', result);
+          console.log('[Login] Response data:', result);
           
           if (result.status === 'success') {
             const userData = {
@@ -552,9 +514,19 @@
               loginSuccess: true
             };
             
-            // Simpan ke cookie dan localStorage
-            setAuthCookie(userData);
+            // === SIMPAN KE SEMUA TEMPAT ===
+            
+            // 1. localStorage (untuk domain yang sama)
             localStorage.setItem('loginData', JSON.stringify(userData));
+            
+            // 2. sessionStorage (backup)
+            sessionStorage.setItem('loginData', JSON.stringify(userData));
+            
+            // 3. Cookie (untuk cross-subdomain)
+            setAuthCookie(userData);
+            
+            // 4. Query parameter (untuk redirect ke profile)
+            const token = encodeURIComponent(JSON.stringify(userData));
             
             if (rememberMe.checked) {
               localStorage.setItem('rememberedUser', JSON.stringify({
@@ -565,8 +537,11 @@
             
             showSuccess('Login berhasil! Selamat datang, ' + userData.name);
             
+            // Redirect dengan query parameter token
             setTimeout(() => {
-              window.location.href = 'https://www.singgatera.my.id/';
+              const redirectUrl = `https://profile.singgatera.my.id/?token=${token}`;
+              console.log('[Login] Redirecting to:', redirectUrl);
+              window.location.href = redirectUrl;
             }, 1500);
             
           } else {
@@ -576,14 +551,7 @@
           
         } catch (error) {
           console.error('[Login] Error:', error);
-          
-          if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-            showError('Gagal terhubung ke server. Periksa koneksi internet Anda.');
-          } else if (error.message.includes('CORS')) {
-            showError('Terjadi masalah keamanan (CORS). Coba lagi atau hubungi administrator.');
-          } else {
-            showError('Terjadi kesalahan: ' + error.message);
-          }
+          showError('Terjadi kesalahan: ' + error.message);
           setLoading(false);
         }
       });
@@ -608,32 +576,16 @@
       // ====== INITIALIZE ======
       // ============================================================
       document.addEventListener('DOMContentLoaded', function() {
-        if (checkAlreadyLoggedIn()) {
-          return;
-        }
-        
         loadRemembered();
         
         if (!usernameInput.value) {
           usernameInput.focus();
         }
         
-        console.log('[Login] Page loaded. Document.domain:', document.domain);
+        console.log('[Login] Page loaded.');
+        console.log('[Login] Document.domain:', document.domain);
         console.log('[Login] Cookies:', document.cookie);
-      });
-
-      // ============================================================
-      // ====== REMEMBER ME ======
-      // ============================================================
-      rememberMe.addEventListener('change', function() {
-        if (this.checked && usernameInput.value) {
-          localStorage.setItem('rememberedUser', JSON.stringify({
-            username: usernameInput.value,
-            remember: true
-          }));
-        } else {
-          localStorage.removeItem('rememberedUser');
-        }
+        console.log('[Login] localStorage:', localStorage.getItem('loginData'));
       });
 
       // ============================================================
