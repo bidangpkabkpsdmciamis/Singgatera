@@ -199,6 +199,25 @@
       .signup-link a:hover {
         text-decoration: underline;
       }
+      /* Tombol kembali ke profile */
+      #backToProfile {
+        text-align: center;
+        margin-top: 20px;
+      }
+      #backToProfile .btn-back {
+        display: inline-block;
+        padding: 10px 25px;
+        background: #6c757d;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        font-weight: 600;
+        transition: transform 0.3s, box-shadow 0.3s;
+      }
+      #backToProfile .btn-back:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(108, 117, 125, 0.4);
+      }
       @media (max-width: 768px) {
         .login-container {
           flex-direction: column;
@@ -274,6 +293,12 @@
             Kembali ke Home
           </button>
         </form>
+        <!-- Tombol Kembali ke Profile (jika dari profile) -->
+        <div id="backToProfile" style="display: none;">
+          <a href="https://www.profile.singgatera.my.id" class="btn-back">
+            <i class="fas fa-arrow-left"></i> Kembali ke Profil
+          </a>
+        </div>
         <div class="signup-link">
           Tidak punya akun?
           <a href="https://wa.me/6282113568415">Hubungi Administrator</a>
@@ -287,6 +312,20 @@
         "https://script.google.com/macros/s/AKfycbyHoP_UdQUBDQVOpL8q0F8XfXapfhyGbFRM2qC2NI47sAc_LhSxB4XlMAZvDTBr16C6Bg/exec";
 
       document.addEventListener("DOMContentLoaded", function () {
+        // ===== CEK APAKAH DARI PROFILE =====
+        const referrer = document.referrer || '';
+        if (referrer.includes('profile.singgatera.my.id')) {
+          document.getElementById('backToProfile').style.display = 'block';
+        }
+
+        // ===== CEK REDIRECT PARAMETER =====
+        const urlParams = new URLSearchParams(window.location.search);
+        const redirectUrl = urlParams.get('redirect');
+        if (redirectUrl) {
+          sessionStorage.setItem('redirectAfterLogin', redirectUrl);
+          console.log('[Login] Akan redirect ke:', redirectUrl);
+        }
+
         document
           .getElementById("loginForm")
           .addEventListener("submit", async function (e) {
@@ -320,34 +359,42 @@
 
               const result = await response.json();
 
-             // Setelah login berhasil
-if (result.status === "success") {
-  // Simpan data login ke localStorage
-  const loginData = {
-    name: result.name,
-    username: result.username, // Simpan username/NIP
-    loginTime: new Date().toISOString(),
-  };
+              if (result.status === "success") {
+                // Simpan data login
+                const loginData = {
+                  name: result.name,
+                  username: result.username,
+                  loginTime: new Date().toISOString(),
+                };
 
-  localStorage.setItem("loginData", JSON.stringify(loginData));
+                // ===== SIMPAN KE LOCALSTORAGE =====
+                localStorage.setItem("loginData", JSON.stringify(loginData));
 
-  alert("Login berhasil! Selamat datang, " + result.name);
-  
-  // CEK APAKAH DARI HALAMAN PROFILE ATAU TIDAK
-  const referrer = document.referrer || '';
-  const isFromProfile = referrer.includes('profile.singgatera.my.id');
-  
-  if (isFromProfile) {
-    // Jika dari profile, redirect balik dengan data
-    const encodedData = encodeURIComponent(JSON.stringify(loginData));
-    window.location.href = `https://www.profile.singgatera.my.id?loginData=${encodedData}`;
-  } else {
-    // Jika dari home, redirect ke index
-    window.location.href = "index.html";
-  }
-} else {
-  alert("Login gagal: " + result.message);
-}
+                // ===== SIMPAN KE COOKIE (UNTUK SEMUA SUBDOMAIN) =====
+                const cookieValue = encodeURIComponent(JSON.stringify(loginData));
+                // domain=.singgatera.my.id → semua subdomain bisa akses
+                // max-age=86400 → 24 jam
+                document.cookie = `loginData=${cookieValue}; path=/; domain=.singgatera.my.id; max-age=86400; SameSite=Lax; Secure`;
+                
+                console.log('[Login] ✅ Cookie disimpan untuk .singgatera.my.id');
+                console.log('[Login] ✅ Data login:', loginData);
+
+                alert("Login berhasil! Selamat datang, " + result.name);
+                
+                // ===== CEK REDIRECT =====
+                const redirectAfter = sessionStorage.getItem('redirectAfterLogin');
+                if (redirectAfter) {
+                  sessionStorage.removeItem('redirectAfterLogin');
+                  // Kirim data login via URL parameter (fallback)
+                  const encodedData = encodeURIComponent(JSON.stringify(loginData));
+                  const separator = redirectAfter.includes('?') ? '&' : '?';
+                  window.location.href = `${redirectAfter}${separator}loginData=${encodedData}`;
+                } else {
+                  window.location.href = "index.html?login=success";
+                }
+              } else {
+                alert("Login gagal: " + result.message);
+              }
             } catch (error) {
               alert("Login gagal. Terdapat kesalahan: " + error.message);
               console.error("Error:", error);
@@ -365,55 +412,6 @@ if (result.status === "success") {
         document.getElementById("password").value = "password123";
         document.getElementById("loginForm").dispatchEvent(new Event("submit"));
       }
-  // ===== CEK REDIRECT DARI PROFILE =====
-document.addEventListener('DOMContentLoaded', function() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const redirectUrl = urlParams.get('redirect');
-  
-  if (redirectUrl) {
-    // Simpan redirect URL untuk digunakan setelah login
-    sessionStorage.setItem('redirectAfterLogin', redirectUrl);
-    console.log('[Login] Akan redirect ke:', redirectUrl);
-  }
-  
-  // Jika ada redirect, ubah perilaku form submit
-  const form = document.getElementById('loginForm');
-  const originalSubmit = form.onsubmit;
-  
-  form.addEventListener('submit', async function(e) {
-    e.preventDefault();
-    
-    // ... kode login yang sudah ada ...
-    
-    // Setelah login berhasil
-    if (result.status === "success") {
-      const loginData = {
-        name: result.name,
-        username: result.username,
-        loginTime: new Date().toISOString()
-      };
-      
-      localStorage.setItem("loginData", JSON.stringify(loginData));
-      
-      // Cek apakah ada redirect URL
-      const redirectAfter = sessionStorage.getItem('redirectAfterLogin');
-      if (redirectAfter) {
-        sessionStorage.removeItem('redirectAfterLogin');
-        // Kirim data login via URL parameter
-        const encodedData = encodeURIComponent(JSON.stringify(loginData));
-        const separator = redirectAfter.includes('?') ? '&' : '?';
-        window.location.href = `${redirectAfter}${separator}loginData=${encodedData}`;
-      } else {
-        alert("Login berhasil! Selamat datang, " + result.name);
-        window.location.href = "index.html";
-      }
-    } else {
-      alert("Login gagal: " + result.message);
-    }
-  });
-});
     </script>
-  
-  
   </body>
 </html>
