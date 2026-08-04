@@ -320,21 +320,34 @@
 
               const result = await response.json();
 
-              if (result.status === "success") {
-                // Simpan data login ke localStorage
-                const loginData = {
-                  name: result.name,
-                  username: result.username, // Simpan username/NIP
-                  loginTime: new Date().toISOString(),
-                };
+             // Setelah login berhasil
+if (result.status === "success") {
+  // Simpan data login ke localStorage
+  const loginData = {
+    name: result.name,
+    username: result.username, // Simpan username/NIP
+    loginTime: new Date().toISOString(),
+  };
 
-                localStorage.setItem("loginData", JSON.stringify(loginData));
+  localStorage.setItem("loginData", JSON.stringify(loginData));
 
-                alert("Login berhasil! Selamat datang, " + result.name);
-                window.location.href = "index.html";
-              } else {
-                alert("Login gagal: " + result.message);
-              }
+  alert("Login berhasil! Selamat datang, " + result.name);
+  
+  // CEK APAKAH DARI HALAMAN PROFILE ATAU TIDAK
+  const referrer = document.referrer || '';
+  const isFromProfile = referrer.includes('profile.singgatera.my.id');
+  
+  if (isFromProfile) {
+    // Jika dari profile, redirect balik dengan data
+    const encodedData = encodeURIComponent(JSON.stringify(loginData));
+    window.location.href = `https://www.profile.singgatera.my.id?loginData=${encodedData}`;
+  } else {
+    // Jika dari home, redirect ke index
+    window.location.href = "index.html";
+  }
+} else {
+  alert("Login gagal: " + result.message);
+}
             } catch (error) {
               alert("Login gagal. Terdapat kesalahan: " + error.message);
               console.error("Error:", error);
