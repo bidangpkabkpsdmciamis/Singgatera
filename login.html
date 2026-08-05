@@ -307,9 +307,9 @@
     </div>
 
     <script>
-      // ** Ganti URL di bawah dengan URL Google Apps Script Anda setelah dipublikasikan. **
-      const scriptUrl =
-        "https://script.google.com/macros/s/AKfycbyHoP_UdQUBDQVOpL8q0F8XfXapfhyGbFRM2qC2NI47sAc_LhSxB4XlMAZvDTBr16C6Bg/exec";
+      // ===== URL GAS =====
+      const GAS_LOGIN_URL = "https://script.google.com/macros/s/AKfycbyHoP_UdQUBDQVOpL8q0F8XfXapfhyGbFRM2qC2NI47sAc_LhSxB4XlMAZvDTBr16C6Bg/exec";
+      const GAS_READ_URL = "https://script.google.com/macros/s/AKfycbyxlEVw146kO39Yq3U7zPholU8JK1lLZj0RndoXt4ADBvtlLfCVrELs3lPK1FgFvvU4uw/exec";
 
       document.addEventListener("DOMContentLoaded", function () {
         // ===== CEK APAKAH DARI PROFILE =====
@@ -341,60 +341,88 @@
             const username = document.getElementById("username").value;
             const password = document.getElementById("password").value;
 
-            const data = {
-              action: "login",
-              username: username,
-              password: password,
-            };
-
             try {
-              const response = await fetch(scriptUrl, {
+              // ===== STEP 1: LOGIN =====
+              const loginResponse = await fetch(GAS_LOGIN_URL, {
                 method: "POST",
-                body: JSON.stringify(data),
+                body: JSON.stringify({
+                  action: "login",
+                  username: username,
+                  password: password,
+                }),
               });
 
-              if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+              if (!loginResponse.ok) {
+                throw new Error(`HTTP error! status: ${loginResponse.status}`);
               }
 
-              const result = await response.json();
+              const loginResult = await loginResponse.json();
 
-              if (result.status === "success") {
-                // Simpan data login
-                const loginData = {
-                  name: result.name,
-                  username: result.username,
-                  loginTime: new Date().toISOString(),
-                };
+              if (loginResult.status !== "success") {
+                alert("Login gagal: " + loginResult.message);
+                return;
+              }
 
-                // ===== SIMPAN KE LOCALSTORAGE =====
-                localStorage.setItem("loginData", JSON.stringify(loginData));
+              console.log('[Login] ✅ Login berhasil:', loginResult.name);
 
-                // ===== SIMPAN KE COOKIE (UNTUK SEMUA SUBDOMAIN) =====
-                const cookieValue = encodeURIComponent(JSON.stringify(loginData));
-                // domain=.singgatera.my.id → semua subdomain bisa akses
-                // max-age=86400 → 24 jam
-                document.cookie = `loginData=${cookieValue}; path=/; domain=.singgatera.my.id; max-age=86400; SameSite=Lax; Secure`;
+              // ===== STEP 2: AMBIL FOTO DARI GAS READ =====
+              submitButton.textContent = "Memuat data...";
+              
+              let foto = '';
+              try {
+                const readUrl = `${GAS_READ_URL}?action=getIdentitas&nip=${encodeURIComponent(username)}`;
+                const readResponse = await fetch(readUrl);
                 
-                console.log('[Login] ✅ Cookie disimpan untuk .singgatera.my.id');
-                console.log('[Login] ✅ Data login:', loginData);
-
-                alert("Login berhasil! Selamat datang, " + result.name);
-                
-                // ===== CEK REDIRECT =====
-                const redirectAfter = sessionStorage.getItem('redirectAfterLogin');
-                if (redirectAfter) {
-                  sessionStorage.removeItem('redirectAfterLogin');
-                  // Kirim data login via URL parameter (fallback)
-                  const encodedData = encodeURIComponent(JSON.stringify(loginData));
-                  const separator = redirectAfter.includes('?') ? '&' : '?';
-                  window.location.href = `${redirectAfter}${separator}loginData=${encodedData}`;
-                } else {
-                  window.location.href = "index.html?login=success";
+                if (readResponse.ok) {
+                  const readResult = await readResponse.json();
+                  if (readResult.success && readResult.data) {
+                    foto = readResult.data.Foto_Profile || '';
+                    console.log('[Login] ✅ Foto berhasil diambil dari GAS Read');
+                  }
                 }
-              } else {
-                alert("Login gagal: " + result.message);
+              } catch (readError) {
+                console.warn('[Login] ⚠️ Gagal ambil foto dari GAS Read:', readError);
               }
+
+              // ===== STEP 3: SIMPAN DATA =====
+              const loginData = {
+                name: loginResult.name,
+                username: username,
+                loginTime: new Date().toISOString(),
+                foto: foto || ''
+              };
+
+              // ===== SIMPAN KE LOCALSTORAGE =====
+              localStorage.setItem("loginData", JSON.stringify(loginData));
+
+              // ===== SIMPAN KE COOKIE (UNTUK SEMUA SUBDOMAIN) =====
+              const cookieValue = encodeURIComponent(JSON.stringify(loginData));
+              document.cookie = `loginData=${cookieValue}; path=/; domain=.singgatera.my.id; max-age=86400; SameSite=Lax; Secure`;
+              
+              // ===== SIMPAN FOTO KE COOKIE TERPISAH UNTUK HEADER =====
+              if (foto && foto.startsWith('data:image')) {
+                const fotoCookie = encodeURIComponent(foto);
+                document.cookie = `headerPhoto=${fotoCookie}; path=/; domain=.singgatera.my.id; max-age=86400; SameSite=Lax; Secure`;
+                console.log('[Login] ✅ Foto header disimpan ke cookie');
+              } else {
+                document.cookie = `headerPhoto=; path=/; domain=.singgatera.my.id; max-age=0`;
+              }
+              
+              console.log('[Login] ✅ Data login:', loginData);
+
+              alert("Login berhasil! Selamat datang, " + loginResult.name);
+              
+              // ===== REDIRECT =====
+              const redirectAfter = sessionStorage.getItem('redirectAfterLogin');
+              if (redirectAfter) {
+                sessionStorage.removeItem('redirectAfterLogin');
+                const encodedData = encodeURIComponent(JSON.stringify(loginData));
+                const separator = redirectAfter.includes('?') ? '&' : '?';
+                window.location.href = `${redirectAfter}${separator}loginData=${encodedData}`;
+              } else {
+                window.location.href = "index.html?login=success";
+              }
+
             } catch (error) {
               alert("Login gagal. Terdapat kesalahan: " + error.message);
               console.error("Error:", error);
