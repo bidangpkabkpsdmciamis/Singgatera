@@ -308,8 +308,12 @@
 
     <script>
       // ===== URL GAS =====
+      // GAS Login - untuk autentikasi user
       const GAS_LOGIN_URL = "https://script.google.com/macros/s/AKfycbyHoP_UdQUBDQVOpL8q0F8XfXapfhyGbFRM2qC2NI47sAc_LhSxB4XlMAZvDTBr16C6Bg/exec";
-      const GAS_READ_URL = "https://script.google.com/macros/s/AKfycbyxlEVw146kO39Yq3U7zPholU8JK1lLZj0RndoXt4ADBvtlLfCVrELs3lPK1FgFvvU4uw/exec";
+      
+      // GAS Photo - untuk mengambil foto profile dari spreadsheet (GAS BARU)
+      // GANTI URL DI BAWAH DENGAN URL DEPLOY GAS PHOTO ANDA
+      const GAS_PHOTO_URL = "https://script.google.com/macros/s/AKfycbzU-mmjB2eQtk8-y_zj4Pc26YIxrmvcJ_8ZJYWFva0kEFIsx488EUWKfdXcXIO0_msB/exec";
 
       document.addEventListener("DOMContentLoaded", function () {
         // ===== CEK APAKAH DARI PROFILE =====
@@ -365,23 +369,29 @@
 
               console.log('[Login] ✅ Login berhasil:', loginResult.name);
 
-              // ===== STEP 2: AMBIL FOTO DARI GAS READ =====
-              submitButton.textContent = "Memuat data...";
+              // ===== STEP 2: AMBIL FOTO DARI GAS PHOTO =====
+              submitButton.textContent = "Memuat foto...";
               
               let foto = '';
               try {
-                const readUrl = `${GAS_READ_URL}?action=getIdentitas&nip=${encodeURIComponent(username)}`;
-                const readResponse = await fetch(readUrl);
+                const photoUrl = `${GAS_PHOTO_URL}?nip=${encodeURIComponent(username)}`;
+                console.log('[Login] 🔍 Ambil foto dari:', photoUrl);
+                const photoResponse = await fetch(photoUrl);
                 
-                if (readResponse.ok) {
-                  const readResult = await readResponse.json();
-                  if (readResult.success && readResult.data) {
-                    foto = readResult.data.Foto_Profile || '';
-                    console.log('[Login] ✅ Foto berhasil diambil dari GAS Read');
+                if (photoResponse.ok) {
+                  const photoResult = await photoResponse.json();
+                  console.log('[Login] 📸 Response GAS Photo:', photoResult);
+                  if (photoResult.success && photoResult.data) {
+                    foto = photoResult.data.foto || '';
+                    console.log('[Login] ✅ Foto ditemukan, length:', foto.length);
+                  } else {
+                    console.warn('[Login] ⚠️ Foto tidak ditemukan di response');
                   }
+                } else {
+                  console.warn('[Login] ⚠️ GAS Photo response not OK:', photoResponse.status);
                 }
-              } catch (readError) {
-                console.warn('[Login] ⚠️ Gagal ambil foto dari GAS Read:', readError);
+              } catch (photoError) {
+                console.warn('[Login] ⚠️ Gagal ambil foto dari GAS Photo:', photoError);
               }
 
               // ===== STEP 3: SIMPAN DATA =====
@@ -392,6 +402,12 @@
                 foto: foto || ''
               };
 
+              console.log('[Login] 📦 Data login:', {
+                name: loginData.name,
+                username: loginData.username,
+                fotoLength: loginData.foto ? loginData.foto.length : 0
+              });
+
               // ===== SIMPAN KE LOCALSTORAGE =====
               localStorage.setItem("loginData", JSON.stringify(loginData));
 
@@ -400,11 +416,15 @@
               document.cookie = `loginData=${cookieValue}; path=/; domain=.singgatera.my.id; max-age=86400; SameSite=Lax; Secure`;
               
               // ===== SIMPAN FOTO KE COOKIE TERPISAH UNTUK HEADER =====
-              if (foto && foto.startsWith('data:image')) {
+              if (foto && foto.length > 100) {
                 const fotoCookie = encodeURIComponent(foto);
                 document.cookie = `headerPhoto=${fotoCookie}; path=/; domain=.singgatera.my.id; max-age=86400; SameSite=Lax; Secure`;
-                console.log('[Login] ✅ Foto header disimpan ke cookie');
+                console.log('[Login] ✅ Foto header disimpan ke cookie, length:', foto.length);
+                
+                // Simpan juga ke localStorage
+                localStorage.setItem('headerPhotoData', foto);
               } else {
+                console.warn('[Login] ⚠️ Foto tidak valid, length:', foto ? foto.length : 0);
                 document.cookie = `headerPhoto=; path=/; domain=.singgatera.my.id; max-age=0`;
               }
               
