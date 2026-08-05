@@ -289,6 +289,7 @@
         background: white;
         color: var(--primary);
       }
+      /* ===== PERUBAHAN: SUPPORT FOTO DI HEADER ===== */
       .user-icon {
         width: 32px;
         height: 32px;
@@ -298,6 +299,13 @@
         align-items: center;
         justify-content: center;
         color: white;
+        overflow: hidden;
+        flex-shrink: 0;
+      }
+      .user-icon img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
       }
       .user-name {
         font-weight: 600;
@@ -1219,8 +1227,11 @@
               />
             </div>
             <div class="user-profile">
+              <!-- ===== PERUBAHAN: TAMBAHKAN id="headerUserIcon" ===== -->
               <div class="user-btn" id="userBtn">
-                <div class="user-icon"><i class="fas fa-user"></i></div>
+                <div class="user-icon" id="headerUserIcon">
+                  <i class="fas fa-user"></i>
+                </div>
                 <div class="user-name" id="userName">Guest</div>
                 <i class="fas fa-chevron-down"></i>
               </div>
@@ -1230,7 +1241,7 @@
                   <p class="user-email" id="dropdownEmail">-</p>
                 </div>
                 <div class="dropdown-links">
-                  <a href="profile.html" class="dropdown-link"
+                  <a href="https://www.profile.singgatera.my.id/" class="dropdown-link"
                     ><i class="fas fa-user-circle"></i
                     ><span>Profil Saya</span></a
                   >
@@ -1279,7 +1290,7 @@
           </p>
         </div>
 
-        <!-- Year Filter - Posisi tombol: 2025, 2026, 2024, 2023, 2022, Semua Tahun -->
+        <!-- Year Filter -->
         <div class="year-filters">
           <button class="year-btn active" onclick="changeYear(2026)">
             2026
@@ -1484,10 +1495,85 @@
 
     <script>
       // ====== KONFIGURASI ======
-      // Ganti dengan URL deployment Google Apps Script Anda
-      // Contoh: https://script.google.com/macros/s/AKfycbxxxxx/exec
       const SCRIPT_URL =
         "https://script.google.com/macros/s/AKfycbymu7jbbpKxDWaLOZTG2QTm2qPD2y_6JtIHCqj95RDiVp4KNCFjkth9r4v_6aYmS4Pm/exec";
+
+      // ====== FUNGSI BACA COOKIE ======
+      function getCookie(name) {
+        const cookies = document.cookie.split('; ');
+        for (let cookie of cookies) {
+          const [key, value] = cookie.split('=');
+          if (key === name) {
+            try {
+              return JSON.parse(decodeURIComponent(value));
+            } catch (e) {
+              return null;
+            }
+          }
+        }
+        return null;
+      }
+
+      // ====== FUNGSI BACA FOTO DARI COOKIE ======
+      function getHeaderPhotoFromCookie() {
+        const cookies = document.cookie.split('; ');
+        for (let cookie of cookies) {
+          const [key, value] = cookie.split('=');
+          if (key === 'headerPhoto') {
+            try {
+              return decodeURIComponent(value);
+            } catch (e) {
+              return null;
+            }
+          }
+        }
+        return null;
+      }
+
+      // ====== UPDATE HEADER DENGAN FOTO ======
+      function updateHeaderPhoto() {
+        const headerIcon = document.getElementById('headerUserIcon');
+        if (!headerIcon) return;
+        
+        let photoData = null;
+        
+        // ===== CEK FOTO DARI COOKIE =====
+        photoData = getHeaderPhotoFromCookie();
+        
+        // ===== FALLBACK KE LOGINDATA DI COOKIE =====
+        if (!photoData) {
+          const loginData = getCookie('loginData');
+          if (loginData && loginData.foto) {
+            photoData = loginData.foto;
+          }
+        }
+        
+        // ===== FALLBACK KE LOCALSTORAGE =====
+        if (!photoData) {
+          try {
+            const localStorageData = localStorage.getItem('headerPhotoData');
+            if (localStorageData) {
+              photoData = localStorageData;
+              console.log('[Tubel] ✅ Foto dari localStorage (fallback)');
+            }
+          } catch (e) {}
+        }
+        
+        // ===== TAMPILKAN =====
+        if (photoData && (photoData.startsWith('data:image') || photoData.startsWith('http'))) {
+          headerIcon.innerHTML = `<img src="${photoData}" alt="Profile" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+          headerIcon.style.background = 'none';
+          headerIcon.style.padding = '0';
+          headerIcon.style.border = '2px solid var(--primary)';
+          console.log('[Tubel] ✅ Foto header ditampilkan');
+        } else {
+          headerIcon.innerHTML = `<i class="fas fa-user"></i>`;
+          headerIcon.style.background = '';
+          headerIcon.style.padding = '';
+          headerIcon.style.border = 'none';
+          console.log('[Tubel] ℹ️ Menggunakan icon default');
+        }
+      }
 
       // ====== VARIABLES ======
       let chartInstance = null;
@@ -1604,11 +1690,8 @@
         showLoading();
 
         try {
-          // Ambil dari GAS
           const gasData = await fetchDataFromGAS();
           processData(gasData);
-
-          // Update UI
           updateAllUI();
         } catch (error) {
           console.error("Error:", error);
@@ -1894,7 +1977,6 @@
       function updateInstitutions(year) {
         const container = document.getElementById("institutionList");
 
-        // Filter institusi berdasarkan tahun yang dipilih
         let filtered = [];
         if (year === "all") {
           filtered = [...allInstitutions];
@@ -1912,7 +1994,6 @@
           return;
         }
 
-        // Urutkan dari jumlah terbanyak ke terkecil
         const sorted = filtered.sort(
           (a, b) => (b.jumlah || 0) - (a.jumlah || 0)
         );
@@ -1941,18 +2022,7 @@
           .join("");
       }
 
-      // ====== FUNGSI LAINNYA ======
-      function setupLegalDocsInteractions() {
-        document.querySelectorAll(".doc-card").forEach((card) => {
-          card.addEventListener("click", function () {
-            const fileName = this.getAttribute("data-file");
-            alert(
-              `Dokumen: ${fileName}\n\nFitur ini akan mengarahkan ke halaman/link unduh dokumen terkait.`
-            );
-          });
-        });
-      }
-
+      // ====== CHECK LOGIN STATUS ======
       function checkLoginStatus() {
         try {
           const loginData = localStorage.getItem("loginData");
@@ -1962,16 +2032,39 @@
             dropdownName.textContent = userData.name || "User";
             dropdownEmail.textContent =
               userData.email || userData.username || "-";
+            
+            // ===== UPDATE HEADER FOTO =====
+            updateHeaderPhoto();
           } else {
             userName.textContent = "Guest";
             dropdownName.textContent = "Guest";
             dropdownEmail.textContent = "Silakan login untuk akses lengkap";
+            
+            // Reset header ke default
+            const headerIcon = document.getElementById('headerUserIcon');
+            if (headerIcon) {
+              headerIcon.innerHTML = `<i class="fas fa-user"></i>`;
+              headerIcon.style.background = '';
+              headerIcon.style.padding = '';
+              headerIcon.style.border = 'none';
+            }
           }
         } catch (e) {
           userName.textContent = "Guest";
           dropdownName.textContent = "Guest";
           dropdownEmail.textContent = "-";
         }
+      }
+
+      // ====== LOGOUT ======
+      function handleLogout(e) {
+        e.preventDefault();
+        document.cookie = `loginData=; path=/; domain=.singgatera.my.id; max-age=0; SameSite=Lax; Secure`;
+        document.cookie = `headerPhoto=; path=/; domain=.singgatera.my.id; max-age=0; SameSite=Lax; Secure`;
+        localStorage.removeItem('loginData');
+        localStorage.removeItem('headerPhotoData');
+        alert("Anda telah keluar dari sistem.");
+        window.location.href = "index.html?logout=true";
       }
 
       // ====== EVENT LISTENERS ======
@@ -2002,12 +2095,7 @@
         }
       });
 
-      logoutBtn.addEventListener("click", (e) => {
-        e.preventDefault();
-        localStorage.removeItem("loginData");
-        alert("Anda telah keluar dari sistem.");
-        window.location.reload();
-      });
+      logoutBtn.addEventListener("click", handleLogout);
 
       scrollTopBtn.addEventListener("click", () => {
         window.scrollTo({ top: 0, behavior: "smooth" });
@@ -2018,7 +2106,6 @@
         document.getElementById("currentYear").textContent =
           new Date().getFullYear();
         fetchData();
-        setupLegalDocsInteractions();
         checkLoginStatus();
       }
 
