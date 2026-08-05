@@ -388,6 +388,7 @@
         color: var(--primary);
       }
 
+      /* ===== PERUBAHAN: SUPPORT FOTO DI HEADER ===== */
       .user-icon {
         width: 36px;
         height: 36px;
@@ -397,6 +398,14 @@
         align-items: center;
         justify-content: center;
         color: white;
+        overflow: hidden;
+        flex-shrink: 0;
+      }
+
+      .user-icon img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
       }
 
       .user-name {
@@ -1283,8 +1292,9 @@
             </div>
 
             <div class="user-profile">
+              <!-- ===== PERUBAHAN: TAMBAHKAN id="headerUserIcon" ===== -->
               <div class="user-btn" id="userBtn">
-                <div class="user-icon">
+                <div class="user-icon" id="headerUserIcon">
                   <i class="fas fa-user"></i>
                 </div>
                 <div class="user-name" id="userName">Guest</div>
@@ -1801,6 +1811,24 @@
         return null;
       }
 
+      // ====== UPDATE HEADER DENGAN FOTO ======
+      function updateHeaderPhoto(photoData) {
+        const headerIcon = document.getElementById('headerUserIcon');
+        if (!headerIcon) return;
+        
+        if (photoData && (photoData.startsWith('data:image') || photoData.startsWith('http'))) {
+          headerIcon.innerHTML = `<img src="${photoData}" alt="Profile" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+          headerIcon.style.background = 'none';
+          headerIcon.style.padding = '0';
+          console.log('[Home] ✅ Foto header diperbarui');
+        } else {
+          headerIcon.innerHTML = `<i class="fas fa-user"></i>`;
+          headerIcon.style.background = '';
+          headerIcon.style.padding = '';
+          console.log('[Home] ℹ️ Menggunakan icon default di header');
+        }
+      }
+
       // ====== TOGGLE SERVICES & QUICK ACCESS BASED ON LOGIN ======
       function toggleServices(isLoggedIn) {
         if (isLoggedIn) {
@@ -1875,6 +1903,20 @@
           loginBtn.innerHTML = '<i class="fas fa-user-circle"></i> Profil Saya';
           loginBtn.href = "https://www.profile.singgatera.my.id/";
 
+          // ===== UPDATE HEADER FOTO =====
+          // Coba ambil foto dari localStorage (disimpan saat login dari profile)
+          const photoFromStorage = localStorage.getItem('headerPhotoData');
+          if (photoFromStorage) {
+            try {
+              const photoData = JSON.parse(photoFromStorage);
+              updateHeaderPhoto(photoData);
+            } catch (e) {
+              updateHeaderPhoto(null);
+            }
+          } else {
+            updateHeaderPhoto(null);
+          }
+
           // Show services & quick access
           toggleServices(true);
           console.log('[Home] ✅ User logged in:', userData.name);
@@ -1885,6 +1927,9 @@
           dropdownEmail.textContent = "Silakan login untuk akses lengkap";
           loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Masuk / Login';
           loginBtn.href = "login.html";
+
+          // Reset header ke default
+          updateHeaderPhoto(null);
 
           // Hide services & quick access
           toggleServices(false);
@@ -1947,6 +1992,7 @@
         document.cookie = `loginData=; path=/; domain=.singgatera.my.id; max-age=0`;
         // Hapus localStorage
         localStorage.removeItem("loginData");
+        localStorage.removeItem("headerPhotoData");
         
         console.log('[Home] ✅ Logout: Semua data login dihapus');
         alert("Anda telah keluar dari sistem.");
