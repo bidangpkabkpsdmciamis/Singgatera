@@ -1771,363 +1771,335 @@
       <i class="fas fa-arrow-up"></i>
     </div>
 
-    <script>
-      // ====== DOM ELEMENTS ======
-      const header = document.getElementById("header");
-      const nav = document.getElementById("nav");
-      const mobileToggle = document.getElementById("mobileToggle");
-      const userBtn = document.getElementById("userBtn");
-      const userDropdown = document.getElementById("userDropdown");
-      const loginBtn = document.getElementById("loginBtn");
-      const logoutBtn = document.getElementById("logoutBtn");
-      const scrollTopBtn = document.getElementById("scrollTop");
+<script>
+  // ====== DOM ELEMENTS ======
+  const header = document.getElementById("header");
+  const nav = document.getElementById("nav");
+  const mobileToggle = document.getElementById("mobileToggle");
+  const userBtn = document.getElementById("userBtn");
+  const userDropdown = document.getElementById("userDropdown");
+  const loginBtn = document.getElementById("loginBtn");
+  const logoutBtn = document.getElementById("logoutBtn");
+  const scrollTopBtn = document.getElementById("scrollTop");
 
-      const userName = document.getElementById("userName");
-      const dropdownName = document.getElementById("dropdownName");
-      const dropdownEmail = document.getElementById("dropdownEmail");
+  const userName = document.getElementById("userName");
+  const dropdownName = document.getElementById("dropdownName");
+  const dropdownEmail = document.getElementById("dropdownEmail");
 
-      const konsultasiCount = document.getElementById("konsultasiCount");
-      const saranCount = document.getElementById("saranCount");
-      const feedbackCount = document.getElementById("feedbackCount");
+  const konsultasiCount = document.getElementById("konsultasiCount");
+  const saranCount = document.getElementById("saranCount");
+  const feedbackCount = document.getElementById("feedbackCount");
 
-      // Services section elements
-      const servicesLocked = document.getElementById("servicesLocked");
-      const servicesUnlocked = document.getElementById("servicesUnlocked");
-      const quickAccessBtn = document.getElementById("quickAccessBtn");
+  const servicesLocked = document.getElementById("servicesLocked");
+  const servicesUnlocked = document.getElementById("servicesUnlocked");
+  const quickAccessBtn = document.getElementById("quickAccessBtn");
 
-      // ====== FUNGSI BACA COOKIE ======
-      function getCookie(name) {
-        const cookies = document.cookie.split('; ');
-        for (let cookie of cookies) {
-          const [key, value] = cookie.split('=');
-          if (key === name) {
-            try {
-              return JSON.parse(decodeURIComponent(value));
-            } catch (e) {
-              return null;
-            }
-          }
-        }
-        return null;
-      }
-
-      // ====== UPDATE HEADER DENGAN FOTO ======
-      function updateHeaderPhoto(photoData) {
-        const headerIcon = document.getElementById('headerUserIcon');
-        if (!headerIcon) return;
-        
-        if (photoData && (photoData.startsWith('data:image') || photoData.startsWith('http'))) {
-          headerIcon.innerHTML = `<img src="${photoData}" alt="Profile" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
-          headerIcon.style.background = 'none';
-          headerIcon.style.padding = '0';
-          console.log('[Home] ✅ Foto header diperbarui');
-        } else {
-          headerIcon.innerHTML = `<i class="fas fa-user"></i>`;
-          headerIcon.style.background = '';
-          headerIcon.style.padding = '';
-          console.log('[Home] ℹ️ Menggunakan icon default di header');
-        }
-      }
-
-      // ====== TOGGLE SERVICES & QUICK ACCESS BASED ON LOGIN ======
-      function toggleServices(isLoggedIn) {
-        if (isLoggedIn) {
-          servicesLocked.classList.add("hidden-section");
-          servicesUnlocked.classList.remove("hidden-section");
-          quickAccessBtn.classList.add("visible");
-        } else {
-          servicesLocked.classList.remove("hidden-section");
-          servicesUnlocked.classList.add("hidden-section");
-          quickAccessBtn.classList.remove("visible");
-        }
-      }
-
-      // ====== CHECK LOGIN STATUS (DIPERBAIKI DENGAN COOKIE) ======
-      function checkLoginStatus() {
-        let userData = null;
-        let isLoggedIn = false;
-        
-        // ===== STEP 1: CEK LOCALSTORAGE =====
-        const loginData = localStorage.getItem("loginData");
-        
-        if (loginData) {
-          userData = JSON.parse(loginData);
-          const loginTime = new Date(userData.loginTime);
-          const currentTime = new Date();
-
-          const isSameDay =
-            loginTime.getDate() === currentTime.getDate() &&
-            loginTime.getMonth() === currentTime.getMonth() &&
-            loginTime.getFullYear() === currentTime.getFullYear();
-
-          if (isSameDay) {
-            isLoggedIn = true;
-            console.log('[Home] ✅ Login valid dari localStorage');
-            
-            // ===== SYNC KE COOKIE =====
-            const cookieValue = encodeURIComponent(JSON.stringify(userData));
-            document.cookie = `loginData=${cookieValue}; path=/; domain=.singgatera.my.id; max-age=86400; SameSite=Lax; Secure`;
-            console.log('[Home] ✅ Cookie disinkronkan');
-          } else {
-            localStorage.removeItem("loginData");
-            console.log('[Home] ⚠️ Login di localStorage kadaluarsa');
-          }
-        }
-        
-        // ===== STEP 2: CEK COOKIE (FALLBACK) =====
-        if (!isLoggedIn) {
-          const cookieData = getCookie('loginData');
-          if (cookieData) {
-            console.log('[Home] ✅ Login data ditemukan di COOKIE (fallback)');
-            
-            // Restore ke localStorage
-            localStorage.setItem('loginData', JSON.stringify(cookieData));
-            userData = cookieData;
-            isLoggedIn = true;
-            console.log('[Home] ✅ Data login direstore dari cookie ke localStorage');
-            
-            // Reload untuk menerapkan perubahan
-            setTimeout(() => {
-              window.location.reload();
-            }, 500);
-            return;
-          }
-        }
-        
-        // ===== UPDATE UI =====
-        if (isLoggedIn && userData) {
-          // User is logged in
-          userName.textContent = userData.name;
-          dropdownName.textContent = userData.name;
-          dropdownEmail.textContent = userData.email || userData.username || "-";
-          loginBtn.innerHTML = '<i class="fas fa-user-circle"></i> Profil Saya';
-          loginBtn.href = "https://www.profile.singgatera.my.id/";
-
-          // ===== UPDATE HEADER FOTO =====
-          // Coba ambil foto dari localStorage (disimpan saat login dari profile)
-          const photoFromStorage = localStorage.getItem('headerPhotoData');
-          if (photoFromStorage) {
-            try {
-              const photoData = JSON.parse(photoFromStorage);
-              updateHeaderPhoto(photoData);
-            } catch (e) {
-              updateHeaderPhoto(null);
-            }
-          } else {
-            updateHeaderPhoto(null);
-          }
-
-          // Show services & quick access
-          toggleServices(true);
-          console.log('[Home] ✅ User logged in:', userData.name);
-        } else {
-          // User is not logged in
-          userName.textContent = "Guest";
-          dropdownName.textContent = "Guest";
-          dropdownEmail.textContent = "Silakan login untuk akses lengkap";
-          loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Masuk / Login';
-          loginBtn.href = "login.html";
-
-          // Reset header ke default
-          updateHeaderPhoto(null);
-
-          // Hide services & quick access
-          toggleServices(false);
-          console.log('[Home] ❌ User not logged in');
-        }
-      }
-
-      // ====== SCROLL EFFECTS ======
-      window.addEventListener("scroll", () => {
-        // Header shadow on scroll
-        if (window.scrollY > 50) {
-          header.classList.add("scrolled");
-        } else {
-          header.classList.remove("scrolled");
-        }
-
-        // Scroll to top button visibility
-        if (window.scrollY > 500) {
-          scrollTopBtn.classList.add("active");
-        } else {
-          scrollTopBtn.classList.remove("active");
-        }
-
-        // Animate elements on scroll
-        animateOnScroll();
-      });
-
-      // ====== MOBILE MENU TOGGLE ======
-      mobileToggle.addEventListener("click", () => {
-        nav.classList.toggle("active");
-        mobileToggle.innerHTML = nav.classList.contains("active")
-          ? '<i class="fas fa-times"></i>'
-          : '<i class="fas fa-bars"></i>';
-      });
-
-      // Close menu when clicking outside
-      document.addEventListener("click", (e) => {
-        if (!nav.contains(e.target) && !mobileToggle.contains(e.target)) {
-          nav.classList.remove("active");
-          mobileToggle.innerHTML = '<i class="fas fa-bars"></i>';
-        }
-      });
-
-      // ====== USER PROFILE DROPDOWN ======
-      userBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        userDropdown.classList.toggle("active");
-      });
-
-      // Close dropdown when clicking outside
-      document.addEventListener("click", () => {
-        userDropdown.classList.remove("active");
-      });
-
-      // ====== LOGOUT FUNCTION (DIPERBAIKI) ======
-      logoutBtn.addEventListener("click", (e) => {
-        e.preventDefault();
-        
-        // Hapus cookie
-        document.cookie = `loginData=; path=/; domain=.singgatera.my.id; max-age=0`;
-        // Hapus localStorage
-        localStorage.removeItem("loginData");
-        localStorage.removeItem("headerPhotoData");
-        
-        console.log('[Home] ✅ Logout: Semua data login dihapus');
-        alert("Anda telah keluar dari sistem.");
-        
-        window.location.href = "index.html?logout=true";
-      });
-
-      // ====== FETCH STATS DATA ======
-      async function fetchStats() {
-        const APPS_SCRIPT_URL =
-          "https://script.google.com/macros/s/AKfycbzyK4G__GrefaA7ixT_csJadki7967etfavgsJHJ16G1NcV8E9ARMVZErzyGq8Udsw/exec";
-
+  // ====== FUNGSI BACA COOKIE ======
+  function getCookie(name) {
+    const cookies = document.cookie.split('; ');
+    for (let cookie of cookies) {
+      const [key, value] = cookie.split('=');
+      if (key === name) {
         try {
-          const response = await fetch(APPS_SCRIPT_URL);
-          if (!response.ok) throw new Error("Gagal mengambil data");
-
-          const data = await response.json();
-
-          // Animate counting
-          animateCounter(konsultasiCount, data.konsultasi || 0);
-          animateCounter(saranCount, data.saran || 0);
-          animateCounter(feedbackCount, data.feedback || 0);
-        } catch (error) {
-          console.error("Error fetching stats:", error);
-          // Set default values
-          konsultasiCount.textContent = "24";
-          saranCount.textContent = "18";
-          feedbackCount.textContent = "42";
+          return JSON.parse(decodeURIComponent(value));
+        } catch (e) {
+          return null;
         }
       }
+    }
+    return null;
+  }
 
-      function animateCounter(element, target) {
-        let current = 0;
-        const increment = target / 50; // 50 steps for animation
-        const timer = setInterval(() => {
-          current += increment;
-          if (current >= target) {
-            element.textContent = target;
-            clearInterval(timer);
-          } else {
-            element.textContent = Math.floor(current);
-          }
-        }, 30);
-      }
-
-      // ====== ANIMATE ON SCROLL ======
-      function animateOnScroll() {
-        const elements = document.querySelectorAll(".fade-in");
-
-        elements.forEach((element) => {
-          const elementTop = element.getBoundingClientRect().top;
-          const windowHeight = window.innerHeight;
-
-          if (elementTop < windowHeight - 100) {
-            element.style.opacity = "1";
-            element.style.transform = "translateY(0)";
-          }
-        });
-      }
-
-      // ====== SCROLL TO TOP ======
-      scrollTopBtn.addEventListener("click", () => {
-        window.scrollTo({
-          top: 0,
-          behavior: "smooth",
-        });
-      });
-
-      // ====== SEARCH FUNCTIONALITY ======
-      const searchInput = document.querySelector(".search-input");
-      if (searchInput) {
-        searchInput.addEventListener("keypress", (e) => {
-          if (e.key === "Enter") {
-            const query = searchInput.value.trim();
-            if (query) {
-              alert(`Melakukan pencarian untuk: "${query}"`);
-              // In production: window.location.href = `search.html?q=${encodeURIComponent(query)}`;
-            }
-          }
-        });
-      }
-
-      // ====== INITIALIZE ======
-      document.addEventListener("DOMContentLoaded", () => {
-        // ===== CEK PARAMETER LOGOUT =====
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('logout') === 'true') {
-          // Hapus parameter dari URL
-          const cleanUrl = window.location.origin + window.location.pathname;
-          window.history.replaceState({}, document.title, cleanUrl);
-          console.log('[Home] ✅ Logout berhasil, URL dibersihkan');
+  // ====== FUNGSI BACA FOTO DARI COOKIE ======
+  function getHeaderPhotoFromCookie() {
+    const cookies = document.cookie.split('; ');
+    for (let cookie of cookies) {
+      const [key, value] = cookie.split('=');
+      if (key === 'headerPhoto') {
+        try {
+          return decodeURIComponent(value);
+        } catch (e) {
+          return null;
         }
+      }
+    }
+    return null;
+  }
+
+  // ====== UPDATE HEADER DENGAN FOTO DARI COOKIE ======
+  function updateHeaderPhoto() {
+    const headerIcon = document.getElementById('headerUserIcon');
+    if (!headerIcon) return;
+    
+    const photoData = getHeaderPhotoFromCookie();
+    
+    if (photoData && (photoData.startsWith('data:image') || photoData.startsWith('http'))) {
+      headerIcon.innerHTML = `<img src="${photoData}" alt="Profile" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+      headerIcon.style.background = 'none';
+      headerIcon.style.padding = '0';
+      console.log('[Home] ✅ Foto header dari cookie');
+    } else {
+      headerIcon.innerHTML = `<i class="fas fa-user"></i>`;
+      headerIcon.style.background = '';
+      headerIcon.style.padding = '';
+      console.log('[Home] ℹ️ Menggunakan icon default di header');
+    }
+  }
+
+  // ====== TOGGLE SERVICES ======
+  function toggleServices(isLoggedIn) {
+    if (isLoggedIn) {
+      servicesLocked.classList.add("hidden-section");
+      servicesUnlocked.classList.remove("hidden-section");
+      quickAccessBtn.classList.add("visible");
+    } else {
+      servicesLocked.classList.remove("hidden-section");
+      servicesUnlocked.classList.add("hidden-section");
+      quickAccessBtn.classList.remove("visible");
+    }
+  }
+
+  // ====== CHECK LOGIN STATUS ======
+  function checkLoginStatus() {
+    let userData = null;
+    let isLoggedIn = false;
+    
+    const loginData = localStorage.getItem("loginData");
+    
+    if (loginData) {
+      userData = JSON.parse(loginData);
+      const loginTime = new Date(userData.loginTime);
+      const currentTime = new Date();
+
+      const isSameDay =
+        loginTime.getDate() === currentTime.getDate() &&
+        loginTime.getMonth() === currentTime.getMonth() &&
+        loginTime.getFullYear() === currentTime.getFullYear();
+
+      if (isSameDay) {
+        isLoggedIn = true;
+        console.log('[Home] ✅ Login valid dari localStorage');
         
-        // ===== CEK PARAMETER LOGIN SUCCESS =====
-        if (urlParams.get('login') === 'success') {
-          // Hapus parameter dari URL
-          const cleanUrl = window.location.origin + window.location.pathname;
-          window.history.replaceState({}, document.title, cleanUrl);
-          console.log('[Home] ✅ Login success, sync cookie');
-          
-          // Force sync cookie
-          const loginData = localStorage.getItem('loginData');
-          if (loginData) {
-            const userData = JSON.parse(loginData);
-            const cookieValue = encodeURIComponent(JSON.stringify(userData));
-            document.cookie = `loginData=${cookieValue}; path=/; domain=.singgatera.my.id; max-age=86400; SameSite=Lax; Secure`;
-            console.log('[Home] ✅ Cookie disinkronkan setelah login');
-          }
+        const cookieValue = encodeURIComponent(JSON.stringify(userData));
+        document.cookie = `loginData=${cookieValue}; path=/; domain=.singgatera.my.id; max-age=86400; SameSite=Lax; Secure`;
+        console.log('[Home] ✅ Cookie disinkronkan');
+      } else {
+        localStorage.removeItem("loginData");
+        console.log('[Home] ⚠️ Login di localStorage kadaluarsa');
+      }
+    }
+    
+    if (!isLoggedIn) {
+      const cookieData = getCookie('loginData');
+      if (cookieData) {
+        console.log('[Home] ✅ Login data ditemukan di COOKIE (fallback)');
+        localStorage.setItem('loginData', JSON.stringify(cookieData));
+        userData = cookieData;
+        isLoggedIn = true;
+        console.log('[Home] ✅ Data login direstore dari cookie ke localStorage');
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
+        return;
+      }
+    }
+    
+    // ===== UPDATE UI =====
+    if (isLoggedIn && userData) {
+      userName.textContent = userData.name;
+      dropdownName.textContent = userData.name;
+      dropdownEmail.textContent = userData.email || userData.username || "-";
+      loginBtn.innerHTML = '<i class="fas fa-user-circle"></i> Profil Saya';
+      loginBtn.href = "https://www.profile.singgatera.my.id/";
+
+      // ===== UPDATE HEADER FOTO DARI COOKIE =====
+      updateHeaderPhoto();
+
+      toggleServices(true);
+      console.log('[Home] ✅ User logged in:', userData.name);
+    } else {
+      userName.textContent = "Guest";
+      dropdownName.textContent = "Guest";
+      dropdownEmail.textContent = "Silakan login untuk akses lengkap";
+      loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Masuk / Login';
+      loginBtn.href = "login.html";
+
+      // Reset header ke default
+      const headerIcon = document.getElementById('headerUserIcon');
+      if (headerIcon) {
+        headerIcon.innerHTML = `<i class="fas fa-user"></i>`;
+        headerIcon.style.background = '';
+        headerIcon.style.padding = '';
+      }
+
+      toggleServices(false);
+      console.log('[Home] ❌ User not logged in');
+    }
+  }
+
+  // ====== LOGOUT ======
+  logoutBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    
+    document.cookie = `loginData=; path=/; domain=.singgatera.my.id; max-age=0`;
+    document.cookie = `headerPhoto=; path=/; domain=.singgatera.my.id; max-age=0`;
+    localStorage.removeItem("loginData");
+    
+    console.log('[Home] ✅ Logout: Semua data login dihapus');
+    alert("Anda telah keluar dari sistem.");
+    
+    window.location.href = "index.html?logout=true";
+  });
+
+  // ====== SCROLL EFFECTS ======
+  window.addEventListener("scroll", () => {
+    if (window.scrollY > 50) {
+      header.classList.add("scrolled");
+    } else {
+      header.classList.remove("scrolled");
+    }
+    if (window.scrollY > 500) {
+      scrollTopBtn.classList.add("active");
+    } else {
+      scrollTopBtn.classList.remove("active");
+    }
+    animateOnScroll();
+  });
+
+  // ====== MOBILE MENU TOGGLE ======
+  mobileToggle.addEventListener("click", () => {
+    nav.classList.toggle("active");
+    mobileToggle.innerHTML = nav.classList.contains("active")
+      ? '<i class="fas fa-times"></i>'
+      : '<i class="fas fa-bars"></i>';
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!nav.contains(e.target) && !mobileToggle.contains(e.target)) {
+      nav.classList.remove("active");
+      mobileToggle.innerHTML = '<i class="fas fa-bars"></i>';
+    }
+  });
+
+  // ====== USER DROPDOWN ======
+  userBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    userDropdown.classList.toggle("active");
+  });
+
+  document.addEventListener("click", () => {
+    userDropdown.classList.remove("active");
+  });
+
+  // ====== FETCH STATS ======
+  async function fetchStats() {
+    const APPS_SCRIPT_URL =
+      "https://script.google.com/macros/s/AKfycbzyK4G__GrefaA7ixT_csJadki7967etfavgsJHJ16G1NcV8E9ARMVZErzyGq8Udsw/exec";
+
+    try {
+      const response = await fetch(APPS_SCRIPT_URL);
+      if (!response.ok) throw new Error("Gagal mengambil data");
+
+      const data = await response.json();
+      animateCounter(konsultasiCount, data.konsultasi || 0);
+      animateCounter(saranCount, data.saran || 0);
+      animateCounter(feedbackCount, data.feedback || 0);
+    } catch (error) {
+      console.error("Error fetching stats:", error);
+      konsultasiCount.textContent = "24";
+      saranCount.textContent = "18";
+      feedbackCount.textContent = "42";
+    }
+  }
+
+  function animateCounter(element, target) {
+    let current = 0;
+    const increment = target / 50;
+    const timer = setInterval(() => {
+      current += increment;
+      if (current >= target) {
+        element.textContent = target;
+        clearInterval(timer);
+      } else {
+        element.textContent = Math.floor(current);
+      }
+    }, 30);
+  }
+
+  // ====== ANIMATE ON SCROLL ======
+  function animateOnScroll() {
+    const elements = document.querySelectorAll(".fade-in");
+    elements.forEach((element) => {
+      const elementTop = element.getBoundingClientRect().top;
+      const windowHeight = window.innerHeight;
+      if (elementTop < windowHeight - 100) {
+        element.style.opacity = "1";
+        element.style.transform = "translateY(0)";
+      }
+    });
+  }
+
+  // ====== SCROLL TO TOP ======
+  scrollTopBtn.addEventListener("click", () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+
+  // ====== SEARCH ======
+  const searchInput = document.querySelector(".search-input");
+  if (searchInput) {
+    searchInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        const query = searchInput.value.trim();
+        if (query) {
+          alert(`Melakukan pencarian untuk: "${query}"`);
         }
-        
-        checkLoginStatus();
-        fetchStats();
-        animateOnScroll();
+      }
+    });
+  }
 
-        // Set current year in footer
-        const yearElement = document.querySelector(".copyright");
-        if (yearElement) {
-          const currentYear = new Date().getFullYear();
-          yearElement.innerHTML = yearElement.innerHTML.replace(
-            "2025",
-            currentYear
-          );
-        }
+  // ====== INITIALIZE ======
+  document.addEventListener("DOMContentLoaded", () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('logout') === 'true') {
+      const cleanUrl = window.location.origin + window.location.pathname;
+      window.history.replaceState({}, document.title, cleanUrl);
+      console.log('[Home] ✅ Logout berhasil, URL dibersihkan');
+    }
+    
+    if (urlParams.get('login') === 'success') {
+      const cleanUrl = window.location.origin + window.location.pathname;
+      window.history.replaceState({}, document.title, cleanUrl);
+      console.log('[Home] ✅ Login success, sync cookie');
+      
+      const loginData = localStorage.getItem('loginData');
+      if (loginData) {
+        const userData = JSON.parse(loginData);
+        const cookieValue = encodeURIComponent(JSON.stringify(userData));
+        document.cookie = `loginData=${cookieValue}; path=/; domain=.singgatera.my.id; max-age=86400; SameSite=Lax; Secure`;
+        console.log('[Home] ✅ Cookie disinkronkan setelah login');
+      }
+    }
+    
+    checkLoginStatus();
+    fetchStats();
+    animateOnScroll();
 
-        // Add animation to service cards on hover (only when visible)
-        document.querySelectorAll(".service-card").forEach((card) => {
-          card.addEventListener("mouseenter", function () {
-            this.style.transform = "translateY(-15px)";
-          });
+    const yearElement = document.querySelector(".copyright");
+    if (yearElement) {
+      const currentYear = new Date().getFullYear();
+      yearElement.innerHTML = yearElement.innerHTML.replace("2025", currentYear);
+    }
 
-          card.addEventListener("mouseleave", function () {
-            this.style.transform = "translateY(-10px)";
-          });
-        });
+    document.querySelectorAll(".service-card").forEach((card) => {
+      card.addEventListener("mouseenter", function () {
+        this.style.transform = "translateY(-15px)";
       });
-    </script>
-  </body>
+      card.addEventListener("mouseleave", function () {
+        this.style.transform = "translateY(-10px)";
+      });
+    });
+  });
+</script>
+    
+     </body>
 </html>
