@@ -1291,6 +1291,7 @@
             </div>
 
             <div class="user-profile">
+              <!-- ===== PERUBAHAN: TAMBAHKAN id="headerUserIcon" ===== -->
               <div class="user-btn" id="userBtn">
                 <div class="user-icon" id="headerUserIcon">
                   <i class="fas fa-user"></i>
@@ -1840,6 +1841,17 @@
           if (loginData && loginData.foto) {
             photoData = loginData.foto;
           }
+        }
+        
+        // ===== FALLBACK KE LOCALSTORAGE =====
+        if (!photoData) {
+          try {
+            const localStorageData = localStorage.getItem('headerPhotoData');
+            if (localStorageData) {
+              photoData = localStorageData;
+              console.log('[Home] ✅ Foto dari localStorage (fallback)');
+            }
+          } catch (e) {}
         }
         
         // ===== TAMPILKAN =====
