@@ -148,6 +148,7 @@
         opacity: 0.8;
       }
 
+      /* ===== PERUBAHAN: SUPPORT FOTO DI HEADER ===== */
       .user-profile {
         display: flex;
         align-items: center;
@@ -165,9 +166,26 @@
         background: rgba(255, 255, 255, 0.25);
       }
 
-      .user-profile i {
+      .user-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+
+      .user-avatar i {
         color: white;
-        font-size: 18px;
+        font-size: 28px;
+      }
+
+      .user-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
       }
 
       .user-name {
@@ -829,14 +847,20 @@
             <input type="text" placeholder="Cari data..." />
           </div>
 
+          <!-- ===== PERUBAHAN: TAMBAHKAN user-avatar ===== -->
           <div class="user-profile" id="userProfile">
-            <i class="fas fa-user-circle"></i>
+            <div class="user-avatar" id="headerUserAvatar">
+              <i class="fas fa-user-circle"></i>
+            </div>
             <span class="user-name" id="userName">Guest</span>
             <div class="user-dropdown" id="userDropdown">
               <div class="dropdown-header">
                 <h4 id="dropdownName">Nama Pengguna</h4>
                 <p id="dropdownUsername">username@domain.com</p>
               </div>
+              <a href="https://www.profile.singgatera.my.id/" class="dropdown-item">
+                <i class="fas fa-user-circle"></i> Profil Saya
+              </a>
               <div class="dropdown-item" id="logoutBtn">
                 <i class="fas fa-sign-out-alt"></i> Logout
               </div>
@@ -972,6 +996,77 @@
       let pelatihanData = {};
       let currentFilter = "all";
       let chart;
+
+      // ====== FUNGSI BACA COOKIE ======
+      function getCookie(name) {
+        const cookies = document.cookie.split('; ');
+        for (let cookie of cookies) {
+          const [key, value] = cookie.split('=');
+          if (key === name) {
+            try {
+              return JSON.parse(decodeURIComponent(value));
+            } catch (e) {
+              return null;
+            }
+          }
+        }
+        return null;
+      }
+
+      // ====== FUNGSI BACA FOTO DARI COOKIE ======
+      function getHeaderPhotoFromCookie() {
+        const cookies = document.cookie.split('; ');
+        for (let cookie of cookies) {
+          const [key, value] = cookie.split('=');
+          if (key === 'headerPhoto') {
+            try {
+              return decodeURIComponent(value);
+            } catch (e) {
+              return null;
+            }
+          }
+        }
+        return null;
+      }
+
+      // ====== UPDATE HEADER DENGAN FOTO ======
+      function updateHeaderPhoto() {
+        const avatarEl = document.getElementById('headerUserAvatar');
+        if (!avatarEl) return;
+        
+        let photoData = null;
+        
+        // ===== CEK FOTO DARI COOKIE =====
+        photoData = getHeaderPhotoFromCookie();
+        
+        // ===== FALLBACK KE LOGINDATA DI COOKIE =====
+        if (!photoData) {
+          const loginData = getCookie('loginData');
+          if (loginData && loginData.foto) {
+            photoData = loginData.foto;
+          }
+        }
+        
+        // ===== FALLBACK KE LOCALSTORAGE =====
+        if (!photoData) {
+          try {
+            const localStorageData = localStorage.getItem('headerPhotoData');
+            if (localStorageData) {
+              photoData = localStorageData;
+              console.log('[Dashboard] ✅ Foto dari localStorage (fallback)');
+            }
+          } catch (e) {}
+        }
+        
+        // ===== TAMPILKAN =====
+        if (photoData && (photoData.startsWith('data:image') || photoData.startsWith('http'))) {
+          avatarEl.innerHTML = `<img src="${photoData}" alt="Profile" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+          console.log('[Dashboard] ✅ Foto header ditampilkan');
+        } else {
+          avatarEl.innerHTML = `<i class="fas fa-user-circle"></i>`;
+          console.log('[Dashboard] ℹ️ Menggunakan icon default');
+        }
+      }
 
       // Fungsi untuk mengambil data dari spreadsheet
       async function fetchPelatihanData() {
@@ -1595,7 +1690,7 @@
         });
       }
 
-      // Fungsi untuk memeriksa status login
+      // ====== FUNGSI CHECK LOGIN STATUS ======
       function checkLoginStatus() {
         const userProfile = document.getElementById("userProfile");
         const userName = document.getElementById("userName");
@@ -1612,6 +1707,9 @@
           dropdownUsername.textContent =
             userData.username || "user@bkpsdm.go.id";
 
+          // ===== UPDATE HEADER FOTO =====
+          updateHeaderPhoto();
+
           // Toggle dropdown
           userProfile.addEventListener("click", function (e) {
             e.stopPropagation();
@@ -1625,14 +1723,25 @@
 
           // Logout functionality
           logoutBtn.addEventListener("click", function () {
-            localStorage.removeItem("loginData");
+            // Hapus cookie
+            document.cookie = `loginData=; path=/; domain=.singgatera.my.id; max-age=0; SameSite=Lax; Secure`;
+            document.cookie = `headerPhoto=; path=/; domain=.singgatera.my.id; max-age=0; SameSite=Lax; Secure`;
+            localStorage.removeItem('loginData');
+            localStorage.removeItem('headerPhotoData');
+            
             alert("Anda telah logout.");
-            window.location.reload();
+            window.location.href = "index.html?logout=true";
           });
         } else {
           userName.textContent = "Guest";
           dropdownName.textContent = "Pengunjung";
           dropdownUsername.textContent = "Silakan login";
+          
+          // Reset avatar ke default
+          const avatarEl = document.getElementById('headerUserAvatar');
+          if (avatarEl) {
+            avatarEl.innerHTML = `<i class="fas fa-user-circle"></i>`;
+          }
         }
       }
 
