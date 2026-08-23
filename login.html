@@ -1,433 +1,465 @@
 <!DOCTYPE html>
 <html lang="id">
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Login - SINGGATERA</title>
+    <title>Login SINGGATERA</title>
     <link rel="icon" type="image/png" href="favicon.png" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <!-- Alternatif untuk berbagai perangkat -->
+    <link rel="apple-touch-icon" sizes="180x180" href="favicon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon.png" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        }
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #6e8efb, #a777e3);
-            padding: 20px;
-        }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #6e8efb, #a777e3);
+        padding: 20px;
+      }
+      .login-container {
+        display: flex;
+        width: 100%;
+        max-width: 900px;
+        background-color: #fff;
+        border-radius: 15px;
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+      .login-left {
+        flex: 1;
+        padding: 40px;
+        background: linear-gradient(135deg, #6e8efb, #a777e3);
+        color: white;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+      }
+      .logo-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 30px;
+      }
+      .logo-container img {
+        width: 100px;
+        height: 100px;
+        margin-bottom: 15px;
+        border-radius: 50%;
+        background: white;
+        padding: 10px;
+      }
+      .site-title {
+        font-size: 24px;
+        font-weight: bold;
+        color: white;
+      }
+      .login-left h1 {
+        font-size: 28px;
+        margin-bottom: 15px;
+      }
+      .login-left p {
+        font-size: 16px;
+        opacity: 0.9;
+        line-height: 1.6;
+      }
+      .app-features {
+        margin-top: 30px;
+        text-align: left;
+      }
+      .feature {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+      }
+      .feature i {
+        margin-right: 10px;
+        font-size: 18px;
+        color: #ffeb3b;
+      }
+      .login-right {
+        flex: 1;
+        padding: 40px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+      .login-right h2 {
+        font-size: 24px;
+        margin-bottom: 10px;
+        color: #333;
+        text-align: center;
+      }
+      .login-right p {
+        color: #666;
+        margin-bottom: 30px;
+        text-align: center;
+      }
+      .form-group {
+        margin-bottom: 20px;
+      }
+      .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #333;
+      }
+      .form-group input {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 14px;
+        transition: border-color 0.3s;
+      }
+      .form-group input:focus {
+        border-color: #6e8efb;
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(110, 142, 251, 0.2);
+      }
+      .remember-forgot {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        font-size: 14px;
+      }
+      .remember-forgot label {
+        display: flex;
+        align-items: center;
+        color: #666;
+      }
+      .remember-forgot input {
+        margin-right: 5px;
+      }
+      .remember-forgot a {
+        color: #6e8efb;
+        text-decoration: none;
+      }
+      .remember-forgot a:hover {
+        text-decoration: underline;
+      }
+      .login-button {
+        width: 100%;
+        padding: 12px;
+        background: linear-gradient(135deg, #6e8efb, #a777e3);
+        border: none;
+        border-radius: 5px;
+        color: white;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.3s, box-shadow 0.3s;
+      }
+      .login-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(110, 142, 251, 0.4);
+      }
+      .back-home-button {
+        width: 100%;
+        padding: 12px;
+        background: #6c757d;
+        border: none;
+        border-radius: 5px;
+        color: white;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 15px;
+        transition: transform 0.3s, box-shadow 0.3s;
+      }
+      .back-home-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(108, 117, 125, 0.4);
+      }
+      .signup-link {
+        text-align: center;
+        margin-top: 20px;
+        font-size: 14px;
+        color: #666;
+      }
+      .signup-link a {
+        color: #6e8efb;
+        text-decoration: none;
+        font-weight: 600;
+      }
+      .signup-link a:hover {
+        text-decoration: underline;
+      }
+      /* Tombol kembali ke profile */
+      #backToProfile {
+        text-align: center;
+        margin-top: 20px;
+      }
+      #backToProfile .btn-back {
+        display: inline-block;
+        padding: 10px 25px;
+        background: #6c757d;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        font-weight: 600;
+        transition: transform 0.3s, box-shadow 0.3s;
+      }
+      #backToProfile .btn-back:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(108, 117, 125, 0.4);
+      }
+      @media (max-width: 768px) {
         .login-container {
-            display: flex;
-            width: 100%;
-            max-width: 900px;
-            background-color: #fff;
-            border-radius: 15px;
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
+          flex-direction: column;
         }
         .login-left {
-            flex: 1;
-            padding: 40px;
-            background: linear-gradient(135deg, #6e8efb, #a777e3);
-            color: white;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
+          padding: 30px;
         }
-        .logo-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-        .logo-container img {
-            width: 100px;
-            height: 100px;
-            margin-bottom: 15px;
-            border-radius: 50%;
-            background: white;
-            padding: 10px;
-        }
-        .site-title {
-            font-size: 24px;
-            font-weight: bold;
-            color: white;
-        }
-        .login-left h1 {
-            font-size: 28px;
-            margin-bottom: 15px;
-        }
-        .login-left p {
-            font-size: 16px;
-            opacity: 0.9;
-            line-height: 1.6;
-        }
-        .app-features {
-            margin-top: 30px;
-            text-align: left;
-        }
-        .feature {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        .feature i {
-            margin-right: 10px;
-            font-size: 18px;
-            color: #ffeb3b;
-        }
-        .login-right {
-            flex: 1;
-            padding: 40px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-        .login-right h2 {
-            font-size: 24px;
-            margin-bottom: 10px;
-            color: #333;
-            text-align: center;
-        }
-        .login-right p {
-            color: #666;
-            margin-bottom: 30px;
-            text-align: center;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: #333;
-        }
-        .form-group input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 14px;
-            transition: border-color 0.3s;
-        }
-        .form-group input:focus {
-            border-color: #6e8efb;
-            outline: none;
-            box-shadow: 0 0 0 2px rgba(110, 142, 251, 0.2);
-        }
-        .remember-forgot {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            font-size: 14px;
-        }
-        .remember-forgot label {
-            display: flex;
-            align-items: center;
-            color: #666;
-        }
-        .remember-forgot input {
-            margin-right: 5px;
-        }
-        .remember-forgot a {
-            color: #6e8efb;
-            text-decoration: none;
-        }
-        .remember-forgot a:hover {
-            text-decoration: underline;
-        }
-        .login-button {
-            width: 100%;
-            padding: 12px;
-            background: linear-gradient(135deg, #6e8efb, #a777e3);
-            border: none;
-            border-radius: 5px;
-            color: white;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-        .login-button:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(110, 142, 251, 0.4);
-        }
-        .login-button:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-            transform: none;
-        }
-        .back-home-button {
-            width: 100%;
-            padding: 12px;
-            background: #6c757d;
-            border: none;
-            border-radius: 5px;
-            color: white;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 15px;
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-        .back-home-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(108, 117, 125, 0.4);
-        }
-        .signup-link {
-            text-align: center;
-            margin-top: 20px;
-            font-size: 14px;
-            color: #666;
-        }
-        .signup-link a {
-            color: #6e8efb;
-            text-decoration: none;
-            font-weight: 600;
-        }
-        .signup-link a:hover {
-            text-decoration: underline;
-        }
-        .loading-spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            border-top-color: #fff;
-            animation: spin 1s ease-in-out infinite;
-            margin-right: 10px;
-            vertical-align: middle;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        .alert-box {
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            display: none;
-        }
-        .alert-box.error {
-            display: block;
-            background: #fee2e2;
-            color: #dc2626;
-            border: 1px solid #fca5a5;
-        }
-        .alert-box.success {
-            display: block;
-            background: #dcfce7;
-            color: #16a34a;
-            border: 1px solid #86efac;
-        }
-        @media (max-width: 768px) {
-            .login-container {
-                flex-direction: column;
-            }
-            .login-left {
-                padding: 30px;
-            }
-        }
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="login-container">
-        <div class="login-left">
-            <div class="logo-container">
-                <img src="https://i.ibb.co.com/JWw8qHmM/logo-bkpsdm.png" alt="Logo BKPSDM" />
-                <div class="site-title">PKA BKPSDM</div>
-            </div>
-            <h1>Selamat Datang Kembali</h1>
-            <p>Masuk ke akun Anda untuk mengakses layanan kami</p>
-            <div class="app-features">
-                <div class="feature">
-                    <i class="fas fa-shield-alt"></i>
-                    <span>Keamanan terjamin dengan autentikasi</span>
-                </div>
-                <div class="feature">
-                    <i class="fas fa-user-check"></i>
-                    <span>Akses khusus untuk ASN Kabupaten Ciamis</span>
-                </div>
-                <div class="feature">
-                    <i class="fas fa-cogs"></i>
-                    <span>Manajemen kompetensi yang terintegrasi</span>
-                </div>
-            </div>
+      <div class="login-left">
+        <div class="logo-container">
+          <img
+            href="index.html"
+            src="https://i.ibb.co.com/JWw8qHmM/logo-bkpsdm.png"
+            alt="Logo BKPSDM"
+          />
+          <div class="site-title">PKA BKPSDM</div>
         </div>
-        <div class="login-right">
-            <h2>Masuk ke Akun</h2>
-            <p>Gunakan kredensial Anda</p>
-            
-            <div id="alertBox" class="alert-box"></div>
-            
-            <!-- ===== FORM LOGIN ===== -->
-            <form id="loginForm" method="POST" action="https://script.google.com/macros/s/AKfycbwbbVxgEDsSRKRtcK9BeC0QSaxSD7hFJPphvABqwRo7zpI3RDCzt0DXQEFYqZSQGoJa6g/exec">
-                <input type="hidden" name="action" value="login" />
-                <input type="hidden" name="redirect" value="https://www.singgatera.my.id/login-callback.html" />
-                
-                <div class="form-group">
-                    <label for="username">Username atau NIP</label>
-                    <input type="text" id="username" name="username" required placeholder="Masukkan username atau NIP" />
-                </div>
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" name="password" required placeholder="Masukkan password" />
-                </div>
-                <div class="remember-forgot">
-                    <label><input type="checkbox" name="remember" /> Ingat saya</label>
-                    <a href="#">Lupa password?</a>
-                </div>
-                <button type="submit" class="login-button" id="loginBtn">
-                    <span id="btnText">Masuk</span>
-                    <span id="btnSpinner" style="display:none;" class="loading-spinner"></span>
-                </button>
-                <button type="button" class="back-home-button" onclick="location.href='index.html'">
-                    Kembali ke Home
-                </button>
-            </form>
-            <div class="signup-link">
-                Tidak punya akun?
-                <a href="https://wa.me/6282113568415">Hubungi Administrator</a>
-            </div>
+        <h1>Selamat Datang Kembali</h1>
+        <p>Masuk ke akun Anda untuk mengakses layanan kami</p>
+        <div class="app-features">
+          <div class="feature">
+            <i class="fas fa-shield-alt"></i
+            ><span>Keamanan terjamin dengan autentikasi</span>
+          </div>
+          <div class="feature">
+            <i class="fas fa-user-check"></i
+            ><span>Akses khusus untuk ASN Kabupaten Ciamis</span>
+          </div>
+          <div class="feature">
+            <i class="fas fa-cogs"></i
+            ><span>Manajemen kompetensi yang terintegrasi</span>
+          </div>
         </div>
+      </div>
+      <div class="login-right">
+        <h2>Masuk ke Akun</h2>
+        <p>Gunakan kredensial Anda</p>
+        <form class="login-form" id="loginForm">
+          <div class="form-group">
+            <label for="username">Username atau NIP</label
+            ><input
+              type="text"
+              id="username"
+              name="username"
+              required
+              placeholder="Masukkan username atau NIP"
+            />
+          </div>
+          <div class="form-group">
+            <label for="password">Password</label
+            ><input
+              type="password"
+              id="password"
+              name="password"
+              required
+              placeholder="Masukkan password"
+            />
+          </div>
+          <div class="remember-forgot">
+            <label><input type="checkbox" name="remember" /> Ingat saya</label
+            ><a href="#">Lupa password?</a>
+          </div>
+          <button type="submit" class="login-button">Masuk</button>
+          <button
+            type="button"
+            class="back-home-button"
+            onclick="location.href='index.html'"
+          >
+            Kembali ke Home
+          </button>
+        </form>
+        <!-- Tombol Kembali ke Profile (jika dari profile) -->
+        <div id="backToProfile" style="display: none;">
+          <a href="https://www.profile.singgatera.my.id" class="btn-back">
+            <i class="fas fa-arrow-left"></i> Kembali ke Profil
+          </a>
+        </div>
+        <div class="signup-link">
+          Tidak punya akun?
+          <a href="https://wa.me/6282113568415">Hubungi Administrator</a>
+        </div>
+      </div>
     </div>
 
     <script>
-        // ====== FUNGSI COOKIE ======
-        function getCookie(name) {
-            const cookies = document.cookie.split('; ');
-            for (let cookie of cookies) {
-                const [key, value] = cookie.split('=');
-                if (key === name) {
-                    try {
-                        const decoded = decodeURIComponent(value);
-                        try { return JSON.parse(decoded); } catch(e) { return decoded; }
-                    } catch(e) { return value; }
-                }
-            }
-            return null;
+      // ===== URL GAS =====
+      // GAS Login - untuk autentikasi user
+      const GAS_LOGIN_URL = "https://script.google.com/macros/s/AKfycbyHoP_UdQUBDQVOpL8q0F8XfXapfhyGbFRM2qC2NI47sAc_LhSxB4XlMAZvDTBr16C6Bg/exec";
+      
+      // GAS Photo - untuk mengambil foto profile dari spreadsheet (GAS BARU)
+      // GANTI URL DI BAWAH DENGAN URL DEPLOY GAS PHOTO ANDA
+      const GAS_PHOTO_URL = "https://script.google.com/macros/s/AKfycbzU-mmjB2eQtk8-y_zj4Pc26YIxrmvcJ_8ZJYWFva0kEFIsx488EUWKfdXcXIO0_msB/exec";
+
+      document.addEventListener("DOMContentLoaded", function () {
+        // ===== CEK APAKAH DARI PROFILE =====
+        const referrer = document.referrer || '';
+        if (referrer.includes('profile.singgatera.my.id')) {
+          document.getElementById('backToProfile').style.display = 'block';
         }
 
-        // ====== FUNGSI SHOW ALERT ======
-        function showAlert(message, type = 'error') {
-            const alertBox = document.getElementById('alertBox');
-            alertBox.textContent = message;
-            alertBox.className = 'alert-box ' + type;
-            setTimeout(() => {
-                alertBox.className = 'alert-box';
-            }, 5000);
+        // ===== CEK REDIRECT PARAMETER =====
+        const urlParams = new URLSearchParams(window.location.search);
+        const redirectUrl = urlParams.get('redirect');
+        if (redirectUrl) {
+          sessionStorage.setItem('redirectAfterLogin', redirectUrl);
+          console.log('[Login] Akan redirect ke:', redirectUrl);
         }
 
-        // ====== CEK APAKAH SUDAH LOGIN ======
-        function checkAlreadyLoggedIn() {
-            const loginData = getCookie('loginData') || localStorage.getItem('loginData');
-            if (loginData) {
-                let parsed = loginData;
-                if (typeof loginData === 'string') {
-                    try { parsed = JSON.parse(loginData); } catch(e) {}
-                }
-                if (parsed && (parsed.username || parsed.name)) {
-                    window.location.href = 'index.html';
-                    return true;
-                }
-            }
-            return false;
-        }
+        document
+          .getElementById("loginForm")
+          .addEventListener("submit", async function (e) {
+            e.preventDefault();
 
-        // ====== CEK PARAMETER URL (untuk callback) ======
-        function checkCallbackParams() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const status = urlParams.get('status');
-            const name = urlParams.get('name');
-            const username = urlParams.get('username');
-            const message = urlParams.get('message');
-            
-            if (status === 'success' && username) {
-                // ===== LOGIN SUKSES DARI CALLBACK =====
-                const loginData = {
-                    name: name || username,
-                    username: username,
-                    email: username + '@ciamiskab.go.id',
-                    loginTime: new Date().toISOString(),
-                    foto: ''
-                };
-                
-                localStorage.setItem("loginData", JSON.stringify(loginData));
-                
-                const cookieValue = JSON.stringify(loginData);
-                document.cookie = `loginData=${encodeURIComponent(cookieValue)}; path=/; domain=.singgatera.my.id; max-age=86400; SameSite=Lax; Secure`;
-                document.cookie = `loginData=${encodeURIComponent(cookieValue)}; path=/; max-age=86400; SameSite=Lax; Secure`;
-                
-                showAlert('✅ Login berhasil! Selamat datang, ' + loginData.name, 'success');
-                
-                setTimeout(() => {
-                    window.location.href = 'index.html?login=success';
-                }, 1500);
-                
-                // Hapus parameter URL
-                const cleanUrl = window.location.origin + window.location.pathname;
-                window.history.replaceState({}, document.title, cleanUrl);
-                return true;
-            } else if (status === 'error') {
-                showAlert('❌ ' + (message || 'Login gagal. Silakan coba lagi.'), 'error');
-                const cleanUrl = window.location.origin + window.location.pathname;
-                window.history.replaceState({}, document.title, cleanUrl);
-                return true;
-            }
-            return false;
-        }
+            const submitButton = this.querySelector(".login-button");
+            const originalText = submitButton.textContent;
 
-        // ====== EVENT LISTENER ======
-        document.addEventListener("DOMContentLoaded", function () {
-            // ===== CEK PARAMETER =====
-            if (checkCallbackParams()) {
+            // Tampilkan loading
+            submitButton.textContent = "Memproses...";
+            submitButton.disabled = true;
+
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+
+            try {
+              // ===== STEP 1: LOGIN =====
+              const loginResponse = await fetch(GAS_LOGIN_URL, {
+                method: "POST",
+                body: JSON.stringify({
+                  action: "login",
+                  username: username,
+                  password: password,
+                }),
+              });
+
+              if (!loginResponse.ok) {
+                throw new Error(`HTTP error! status: ${loginResponse.status}`);
+              }
+
+              const loginResult = await loginResponse.json();
+
+              if (loginResult.status !== "success") {
+                alert("Login gagal: " + loginResult.message);
                 return;
-            }
-            
-            // ===== CEK SUDAH LOGIN =====
-            if (checkAlreadyLoggedIn()) {
-                return;
-            }
+              }
 
-            // ===== SUBMIT FORM =====
-            document.getElementById("loginForm").addEventListener("submit", function (e) {
-                const username = document.getElementById("username").value.trim();
-                const password = document.getElementById("password").value;
-                
-                if (!username || !password) {
-                    e.preventDefault();
-                    showAlert('Mohon isi username dan password!', 'error');
-                    return;
-                }
-                
-                // Tampilkan loading
-                const btnText = document.getElementById('btnText');
-                const btnSpinner = document.getElementById('btnSpinner');
-                const loginBtn = document.getElementById('loginBtn');
-                
-                btnText.textContent = 'Memproses...';
-                btnSpinner.style.display = 'inline-block';
-                loginBtn.disabled = true;
-                
-                console.log('[Login] 📤 Submit form ke GAS');
-            });
+              console.log('[Login] ✅ Login berhasil:', loginResult.name);
 
-            // ===== KEYBOARD SHORTCUT =====
-            document.getElementById('password').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+              // ===== STEP 2: AMBIL FOTO DARI GAS PHOTO =====
+              submitButton.textContent = "Memuat foto...";
+              
+              let foto = '';
+              try {
+                const photoUrl = `${GAS_PHOTO_URL}?nip=${encodeURIComponent(username)}`;
+                console.log('[Login] 🔍 Ambil foto dari:', photoUrl);
+                const photoResponse = await fetch(photoUrl);
+                
+                if (photoResponse.ok) {
+                  const photoResult = await photoResponse.json();
+                  console.log('[Login] 📸 Response GAS Photo:', photoResult);
+                  if (photoResult.success && photoResult.data) {
+                    foto = photoResult.data.foto || '';
+                    console.log('[Login] ✅ Foto ditemukan, length:', foto.length);
+                  } else {
+                    console.warn('[Login] ⚠️ Foto tidak ditemukan di response');
+                  }
+                } else {
+                  console.warn('[Login] ⚠️ GAS Photo response not OK:', photoResponse.status);
                 }
-            });
-        });
+              } catch (photoError) {
+                console.warn('[Login] ⚠️ Gagal ambil foto dari GAS Photo:', photoError);
+              }
+
+              // ===== STEP 3: SIMPAN DATA =====
+              const loginData = {
+                name: loginResult.name,
+                username: username,
+                loginTime: new Date().toISOString(),
+                foto: foto || ''
+              };
+
+              console.log('[Login] 📦 Data login:', {
+                name: loginData.name,
+                username: loginData.username,
+                fotoLength: loginData.foto ? loginData.foto.length : 0
+              });
+
+              // ===== SIMPAN KE LOCALSTORAGE =====
+              localStorage.setItem("loginData", JSON.stringify(loginData));
+
+              // ===== SIMPAN KE COOKIE (UNTUK SEMUA SUBDOMAIN) =====
+              const cookieValue = encodeURIComponent(JSON.stringify(loginData));
+              document.cookie = `loginData=${cookieValue}; path=/; domain=.singgatera.my.id; max-age=86400; SameSite=Lax; Secure`;
+              
+              // ===== SIMPAN FOTO KE COOKIE TERPISAH UNTUK HEADER =====
+              if (foto && foto.length > 100) {
+                const fotoCookie = encodeURIComponent(foto);
+                document.cookie = `headerPhoto=${fotoCookie}; path=/; domain=.singgatera.my.id; max-age=86400; SameSite=Lax; Secure`;
+                console.log('[Login] ✅ Foto header disimpan ke cookie, length:', foto.length);
+                
+                // Simpan juga ke localStorage
+                localStorage.setItem('headerPhotoData', foto);
+              } else {
+                console.warn('[Login] ⚠️ Foto tidak valid, length:', foto ? foto.length : 0);
+                document.cookie = `headerPhoto=; path=/; domain=.singgatera.my.id; max-age=0`;
+              }
+              
+              console.log('[Login] ✅ Data login:', loginData);
+
+              alert("Login berhasil! Selamat datang, " + loginResult.name);
+              
+              // ===== REDIRECT =====
+              const redirectAfter = sessionStorage.getItem('redirectAfterLogin');
+              if (redirectAfter) {
+                sessionStorage.removeItem('redirectAfterLogin');
+                const encodedData = encodeURIComponent(JSON.stringify(loginData));
+                const separator = redirectAfter.includes('?') ? '&' : '?';
+                window.location.href = `${redirectAfter}${separator}loginData=${encodedData}`;
+              } else {
+                window.location.href = "index.html?login=success";
+              }
+
+            } catch (error) {
+              alert("Login gagal. Terdapat kesalahan: " + error.message);
+              console.error("Error:", error);
+            } finally {
+              // Reset button
+              submitButton.textContent = originalText;
+              submitButton.disabled = false;
+            }
+          });
+      });
+
+      // Function untuk testing login
+      function testLogin() {
+        document.getElementById("username").value = "196512101987031001";
+        document.getElementById("password").value = "password123";
+        document.getElementById("loginForm").dispatchEvent(new Event("submit"));
+      }
     </script>
-</body>
+  </body>
 </html>
