@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Login Callback - SINGGATERA</title>
+    <link rel="icon" type="image/png" href="favicon.png" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <style>
         * {
@@ -133,12 +134,14 @@
 </head>
 <body>
     <div class="callback-container" id="callbackContainer">
+        <!-- LOADING STATE -->
         <div id="loadingState">
             <div class="spinner"></div>
             <h2>Memproses Login...</h2>
             <p>Mohon tunggu sebentar, sedang memverifikasi akun Anda.</p>
         </div>
         
+        <!-- SUCCESS STATE -->
         <div id="successState" style="display:none;">
             <div class="icon success"><i class="fas fa-check-circle"></i></div>
             <h2>✅ Login Berhasil!</h2>
@@ -153,6 +156,7 @@
             </div>
         </div>
         
+        <!-- ERROR STATE -->
         <div id="errorState" style="display:none;">
             <div class="icon error"><i class="fas fa-times-circle"></i></div>
             <h2>❌ Login Gagal</h2>
