@@ -290,7 +290,11 @@
             
             <div id="alertBox" class="alert-box"></div>
             
-            <form class="login-form" id="loginForm">
+            <!-- ===== FORM DENGAN SUBMIT BIASA (BUKAN FETCH) ===== -->
+            <form id="loginForm" method="POST" action="https://script.google.com/macros/s/AKfycbyHoP_UdQUBDQVOpL8q0F8XfXapfhyGbFRM2qC2NI47sAc_LhSxB4XlMAZvDTBr16C6Bg/exec">
+                <input type="hidden" name="action" value="login" />
+                <input type="hidden" name="redirect" value="https://www.singgatera.my.id/login-callback.html" />
+                
                 <div class="form-group">
                     <label for="username">Username atau NIP</label>
                     <input type="text" id="username" name="username" required placeholder="Masukkan username atau NIP" />
@@ -326,28 +330,8 @@
     <script>
         // ====== KONFIGURASI ======
         const GAS_LOGIN_URL = "https://script.google.com/macros/s/AKfycbyHoP_UdQUBDQVOpL8q0F8XfXapfhyGbFRM2qC2NI47sAc_LhSxB4XlMAZvDTBr16C6Bg/exec";
-        const GAS_PHOTO_URL = "https://script.google.com/macros/s/AKfycbzU-mmjB2eQtk8-y_zj4Pc26YIxrmvcJ_8ZJYWFva0kEFIsx488EUWKfdXcXIO0_msB/exec";
 
         // ====== FUNGSI COOKIE ======
-        function setCookie(name, value, days = 1) {
-            const expires = new Date();
-            expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
-            
-            let encodedValue;
-            if (typeof value === 'string') {
-                encodedValue = encodeURIComponent(value);
-            } else {
-                encodedValue = encodeURIComponent(JSON.stringify(value));
-            }
-            
-            // Set untuk semua subdomain
-            document.cookie = `${name}=${encodedValue}; expires=${expires.toUTCString()}; path=/; domain=.singgatera.my.id; SameSite=Lax; Secure`;
-            document.cookie = `${name}=${encodedValue}; expires=${expires.toUTCString()}; path=/; SameSite=Lax; Secure`;
-            
-            console.log(`[Login] ✅ Cookie "${name}" diset`);
-            return true;
-        }
-
         function getCookie(name) {
             const cookies = document.cookie.split('; ');
             for (let cookie of cookies) {
@@ -355,14 +339,8 @@
                 if (key === name) {
                     try {
                         const decoded = decodeURIComponent(value);
-                        try {
-                            return JSON.parse(decoded);
-                        } catch (e) {
-                            return decoded;
-                        }
-                    } catch (e) {
-                        return value;
-                    }
+                        try { return JSON.parse(decoded); } catch(e) { return decoded; }
+                    } catch(e) { return value; }
                 }
             }
             return null;
@@ -378,120 +356,15 @@
             }, 5000);
         }
 
-        // ====== FUNGSI LOGIN DENGAN REDIRECT ======
-        function loginWithRedirect(username, password) {
-            // Buat form tersembunyi untuk submit ke GAS
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = GAS_LOGIN_URL;
-            form.target = '_blank';
-            
-            // Tambahkan input
-            const inputs = {
-                action: 'login',
-                username: username,
-                password: password,
-                redirect: window.location.origin + '/login-callback.html'
-            };
-            
-            for (const [key, value] of Object.entries(inputs)) {
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = key;
-                input.value = value;
-                form.appendChild(input);
-            }
-            
-            document.body.appendChild(form);
-            form.submit();
-            document.body.removeChild(form);
-            
-            console.log('[Login] 📤 Redirect ke GAS untuk login');
-        }
-
-        // ====== HANDLE LOGIN ======
-        async function handleLogin(username, password) {
-            const btnText = document.getElementById('btnText');
-            const btnSpinner = document.getElementById('btnSpinner');
-            const loginBtn = document.getElementById('loginBtn');
-            
-            btnText.textContent = 'Memproses...';
-            btnSpinner.style.display = 'inline-block';
-            loginBtn.disabled = true;
-
-            try {
-                // ===== KIRIM REQUEST DENGAN no-cors =====
-                console.log('[Login] 📤 Mengirim request login ke GAS...');
-                
-                const loginResponse = await fetch(GAS_LOGIN_URL, {
-                    method: "POST",
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: "login",
-                        username: username,
-                        password: password,
-                    }),
-                });
-
-                // ===== KARENA no-cors, KITA GUNAKAN APPROACH ALTERNATIF =====
-                console.log('[Login] ⚠️ Request no-cors dikirim. Response tidak bisa dibaca.');
-                console.log('[Login] 💡 Gunakan metode redirect untuk verifikasi.');
-                
-                // ===== SIMPAN DATA SEMENTARA =====
-                // Data ini akan digunakan setelah redirect dari GAS
-                const tempData = {
-                    username: username,
-                    loginTime: new Date().toISOString()
-                };
-                
-                localStorage.setItem('pendingLogin', JSON.stringify(tempData));
-                
-                // ===== REDIRECT KE GAS =====
-                // Buat form untuk redirect
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = GAS_LOGIN_URL;
-                
-                const inputs = {
-                    action: 'login',
-                    username: username,
-                    password: password,
-                    redirect: window.location.origin + '/login-callback.html'
-                };
-                
-                for (const [key, value] of Object.entries(inputs)) {
-                    const input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = key;
-                    input.value = value;
-                    form.appendChild(input);
-                }
-                
-                document.body.appendChild(form);
-                form.submit();
-                document.body.removeChild(form);
-                
-                showAlert('🔐 Login diproses... Silakan tunggu.', 'success');
-                return false;
-
-            } catch (error) {
-                console.error('[Login] ❌ Error:', error);
-                showAlert('Login gagal: ' + error.message, 'error');
-                return false;
-            } finally {
-                btnText.textContent = 'Masuk';
-                btnSpinner.style.display = 'none';
-                loginBtn.disabled = false;
-            }
-        }
-
         // ====== CEK CALLBACK ======
         function checkCallback() {
             const urlParams = new URLSearchParams(window.location.search);
             const status = urlParams.get('status');
             const name = urlParams.get('name');
             const username = urlParams.get('username');
+            const message = urlParams.get('message');
+            
+            console.log('[Login] 🔍 Callback params:', { status, name, username, message });
             
             if (status === 'success' && username) {
                 console.log('[Login] ✅ Login berhasil dari callback');
@@ -504,18 +377,35 @@
                     foto: ''
                 };
                 
+                // Simpan ke localStorage
                 localStorage.setItem("loginData", JSON.stringify(loginData));
-                setCookie('loginData', loginData, 1);
                 
-                // Hapus parameter URL
-                window.history.replaceState({}, document.title, window.location.pathname);
+                // Simpan ke cookie dengan domain yang benar
+                const cookieValue = JSON.stringify(loginData);
+                document.cookie = `loginData=${encodeURIComponent(cookieValue)}; path=/; domain=.singgatera.my.id; max-age=86400; SameSite=Lax; Secure`;
+                document.cookie = `loginData=${encodeURIComponent(cookieValue)}; path=/; max-age=86400; SameSite=Lax; Secure`;
+                
+                console.log('[Login] ✅ Data login disimpan');
                 
                 showAlert('✅ Login berhasil! Selamat datang, ' + loginData.name, 'success');
                 
+                // Redirect ke home setelah 1.5 detik
                 setTimeout(() => {
                     window.location.href = 'index.html?login=success';
                 }, 1500);
                 
+                // Hapus parameter URL
+                const cleanUrl = window.location.origin + window.location.pathname;
+                window.history.replaceState({}, document.title, cleanUrl);
+                
+                return true;
+            } else if (status === 'error') {
+                console.log('[Login] ❌ Login gagal:', message);
+                showAlert('❌ ' + (message || 'Login gagal. Silakan coba lagi.'), 'error');
+                
+                // Hapus parameter URL
+                const cleanUrl = window.location.origin + window.location.pathname;
+                window.history.replaceState({}, document.title, cleanUrl);
                 return true;
             }
             
@@ -535,14 +425,6 @@
                 document.getElementById('backToProfile').style.display = 'block';
             }
 
-            // ===== CEK REDIRECT PARAMETER =====
-            const urlParams = new URLSearchParams(window.location.search);
-            const redirectUrl = urlParams.get('redirect');
-            if (redirectUrl) {
-                sessionStorage.setItem('redirectAfterLogin', redirectUrl);
-                console.log('[Login] 🔄 Akan redirect ke:', redirectUrl);
-            }
-
             // ===== CEK APAKAH SUDAH LOGIN =====
             const loginData = getCookie('loginData') || localStorage.getItem('loginData');
             if (loginData) {
@@ -558,18 +440,29 @@
             }
 
             // ===== SUBMIT FORM =====
-            document.getElementById("loginForm").addEventListener("submit", async function (e) {
-                e.preventDefault();
-
+            document.getElementById("loginForm").addEventListener("submit", function (e) {
                 const username = document.getElementById("username").value.trim();
                 const password = document.getElementById("password").value;
-
+                
                 if (!username || !password) {
+                    e.preventDefault();
                     showAlert('Mohon isi username dan password!', 'error');
                     return;
                 }
-
-                await handleLogin(username, password);
+                
+                // Tampilkan loading
+                const btnText = document.getElementById('btnText');
+                const btnSpinner = document.getElementById('btnSpinner');
+                const loginBtn = document.getElementById('loginBtn');
+                
+                btnText.textContent = 'Memproses...';
+                btnSpinner.style.display = 'inline-block';
+                loginBtn.disabled = true;
+                
+                console.log('[Login] 📤 Submit form ke GAS');
+                
+                // Form akan submit secara normal ke GAS
+                // GAS akan redirect ke callback
             });
 
             // ===== KEYBOARD SHORTCUT =====
@@ -579,15 +472,6 @@
                 }
             });
         });
-
-        // ====== FUNGSI TESTING ======
-        function testLogin() {
-            document.getElementById("username").value = "196512101987031001";
-            document.getElementById("password").value = "password123";
-            document.getElementById("loginForm").dispatchEvent(new Event("submit"));
-        }
-        
-        console.log('[Login] 🔧 Untuk testing, ketik: testLogin()');
     </script>
 </body>
 </html>
