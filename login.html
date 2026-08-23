@@ -3,11 +3,8 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Login SINGGATERA</title>
+    <title>Login - SINGGATERA</title>
     <link rel="icon" type="image/png" href="favicon.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="favicon.png" />
-    <link rel="icon" type="image/png" sizes="32x32" href="favicon.png" />
-    <link rel="icon" type="image/png" sizes="16x16" href="favicon.png" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <style>
         * {
@@ -200,24 +197,6 @@
         .signup-link a:hover {
             text-decoration: underline;
         }
-        #backToProfile {
-            text-align: center;
-            margin-top: 20px;
-        }
-        #backToProfile .btn-back {
-            display: inline-block;
-            padding: 10px 25px;
-            background: #6c757d;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            font-weight: 600;
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-        #backToProfile .btn-back:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(108, 117, 125, 0.4);
-        }
         .loading-spinner {
             display: inline-block;
             width: 20px;
@@ -290,8 +269,8 @@
             
             <div id="alertBox" class="alert-box"></div>
             
-            <!-- ===== FORM DENGAN SUBMIT BIASA (BUKAN FETCH) ===== -->
-            <form id="loginForm" method="POST" action="https://script.google.com/macros/s/AKfycbyHoP_UdQUBDQVOpL8q0F8XfXapfhyGbFRM2qC2NI47sAc_LhSxB4XlMAZvDTBr16C6Bg/exec">
+            <!-- ===== FORM LOGIN ===== -->
+            <form id="loginForm" method="POST" action="https://script.google.com/macros/s/AKfycbwbbVxgEDsSRKRtcK9BeC0QSaxSD7hFJPphvABqwRo7zpI3RDCzt0DXQEFYqZSQGoJa6g/exec">
                 <input type="hidden" name="action" value="login" />
                 <input type="hidden" name="redirect" value="https://www.singgatera.my.id/login-callback.html" />
                 
@@ -315,11 +294,6 @@
                     Kembali ke Home
                 </button>
             </form>
-            <div id="backToProfile" style="display: none;">
-                <a href="https://www.profile.singgatera.my.id" class="btn-back">
-                    <i class="fas fa-arrow-left"></i> Kembali ke Profil
-                </a>
-            </div>
             <div class="signup-link">
                 Tidak punya akun?
                 <a href="https://wa.me/6282113568415">Hubungi Administrator</a>
@@ -328,9 +302,6 @@
     </div>
 
     <script>
-        // ====== KONFIGURASI ======
-        const GAS_LOGIN_URL = "https://script.google.com/macros/s/AKfycbyHoP_UdQUBDQVOpL8q0F8XfXapfhyGbFRM2qC2NI47sAc_LhSxB4XlMAZvDTBr16C6Bg/exec";
-
         // ====== FUNGSI COOKIE ======
         function getCookie(name) {
             const cookies = document.cookie.split('; ');
@@ -356,19 +327,32 @@
             }, 5000);
         }
 
-        // ====== CEK CALLBACK ======
-        function checkCallback() {
+        // ====== CEK APAKAH SUDAH LOGIN ======
+        function checkAlreadyLoggedIn() {
+            const loginData = getCookie('loginData') || localStorage.getItem('loginData');
+            if (loginData) {
+                let parsed = loginData;
+                if (typeof loginData === 'string') {
+                    try { parsed = JSON.parse(loginData); } catch(e) {}
+                }
+                if (parsed && (parsed.username || parsed.name)) {
+                    window.location.href = 'index.html';
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // ====== CEK PARAMETER URL (untuk callback) ======
+        function checkCallbackParams() {
             const urlParams = new URLSearchParams(window.location.search);
             const status = urlParams.get('status');
             const name = urlParams.get('name');
             const username = urlParams.get('username');
             const message = urlParams.get('message');
             
-            console.log('[Login] 🔍 Callback params:', { status, name, username, message });
-            
             if (status === 'success' && username) {
-                console.log('[Login] ✅ Login berhasil dari callback');
-                
+                // ===== LOGIN SUKSES DARI CALLBACK =====
                 const loginData = {
                     name: name || username,
                     username: username,
@@ -377,19 +361,14 @@
                     foto: ''
                 };
                 
-                // Simpan ke localStorage
                 localStorage.setItem("loginData", JSON.stringify(loginData));
                 
-                // Simpan ke cookie dengan domain yang benar
                 const cookieValue = JSON.stringify(loginData);
                 document.cookie = `loginData=${encodeURIComponent(cookieValue)}; path=/; domain=.singgatera.my.id; max-age=86400; SameSite=Lax; Secure`;
                 document.cookie = `loginData=${encodeURIComponent(cookieValue)}; path=/; max-age=86400; SameSite=Lax; Secure`;
                 
-                console.log('[Login] ✅ Data login disimpan');
-                
                 showAlert('✅ Login berhasil! Selamat datang, ' + loginData.name, 'success');
                 
-                // Redirect ke home setelah 1.5 detik
                 setTimeout(() => {
                     window.location.href = 'index.html?login=success';
                 }, 1500);
@@ -397,46 +376,26 @@
                 // Hapus parameter URL
                 const cleanUrl = window.location.origin + window.location.pathname;
                 window.history.replaceState({}, document.title, cleanUrl);
-                
                 return true;
             } else if (status === 'error') {
-                console.log('[Login] ❌ Login gagal:', message);
                 showAlert('❌ ' + (message || 'Login gagal. Silakan coba lagi.'), 'error');
-                
-                // Hapus parameter URL
                 const cleanUrl = window.location.origin + window.location.pathname;
                 window.history.replaceState({}, document.title, cleanUrl);
                 return true;
             }
-            
             return false;
         }
 
         // ====== EVENT LISTENER ======
         document.addEventListener("DOMContentLoaded", function () {
-            // ===== CEK CALLBACK =====
-            if (checkCallback()) {
+            // ===== CEK PARAMETER =====
+            if (checkCallbackParams()) {
                 return;
             }
             
-            // ===== CEK APAKAH DARI PROFILE =====
-            const referrer = document.referrer || '';
-            if (referrer.includes('profile.singgatera.my.id')) {
-                document.getElementById('backToProfile').style.display = 'block';
-            }
-
-            // ===== CEK APAKAH SUDAH LOGIN =====
-            const loginData = getCookie('loginData') || localStorage.getItem('loginData');
-            if (loginData) {
-                let parsed = loginData;
-                if (typeof loginData === 'string') {
-                    try { parsed = JSON.parse(loginData); } catch(e) {}
-                }
-                if (parsed && (parsed.username || parsed.name)) {
-                    // Sudah login, redirect ke home
-                    window.location.href = 'index.html';
-                    return;
-                }
+            // ===== CEK SUDAH LOGIN =====
+            if (checkAlreadyLoggedIn()) {
+                return;
             }
 
             // ===== SUBMIT FORM =====
@@ -460,9 +419,6 @@
                 loginBtn.disabled = true;
                 
                 console.log('[Login] 📤 Submit form ke GAS');
-                
-                // Form akan submit secara normal ke GAS
-                // GAS akan redirect ke callback
             });
 
             // ===== KEYBOARD SHORTCUT =====
