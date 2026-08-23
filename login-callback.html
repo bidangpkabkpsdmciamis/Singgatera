@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login Callback</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .callback-container {
+            background: white;
+            padding: 50px;
+            border-radius: 15px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+        .callback-container .icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+        .callback-container .icon.success {
+            color: #22c55e;
+        }
+        .callback-container .icon.error {
+            color: #ef4444;
+        }
+        .callback-container h2 {
+            color: #1e293b;
+            margin-bottom: 10px;
+        }
+        .callback-container p {
+            color: #64748b;
+            margin-bottom: 20px;
+        }
+        .callback-container .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: transform 0.3s;
+        }
+        .callback-container .btn:hover {
+            transform: translateY(-2px);
+        }
+        .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e2e8f0;
+            border-radius: 50%;
+            border-top-color: #6e8efb;
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="callback-container" id="callbackContainer">
+        <div class="spinner" id="spinner"></div>
+        <h2 id="statusText">Memproses Login...</h2>
+        <p id="messageText">Mohon tunggu sebentar...</p>
+        <a href="index.html" class="btn" id="homeBtn" style="display:none;">
+            <i class="fas fa-home"></i> Kembali ke Home
+        </a>
+    </div>
+
+    <script>
+        (function() {
+            // ===== AMBIL PARAMETER =====
+            const urlParams = new URLSearchParams(window.location.search);
+            const status = urlParams.get('status');
+            const name = urlParams.get('name');
+            const username = urlParams.get('username');
+            const message = urlParams.get('message') || '';
+            
+            const spinner = document.getElementById('spinner');
+            const statusText = document.getElementById('statusText');
+            const messageText = document.getElementById('messageText');
+            const homeBtn = document.getElementById('homeBtn');
+            
+            console.log('[Callback] 📥 Status:', status);
+            console.log('[Callback] 📥 Name:', name);
+            console.log('[Callback] 📥 Username:', username);
+            
+            // ===== FUNGSI COOKIE =====
+            function setCookie(name, value, days = 1) {
+                const expires = new Date();
+                expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
+                const encodedValue = typeof value === 'string' ? 
+                    encodeURIComponent(value) : 
+                    encodeURIComponent(JSON.stringify(value));
+                document.cookie = `${name}=${encodedValue}; expires=${expires.toUTCString()}; path=/; domain=.singgatera.my.id; SameSite=Lax; Secure`;
+                document.cookie = `${name}=${encodedValue}; expires=${expires.toUTCString()}; path=/; SameSite=Lax; Secure`;
+            }
+            
+            function getCookie(name) {
+                const cookies = document.cookie.split('; ');
+                for (let cookie of cookies) {
+                    const [key, value] = cookie.split('=');
+                    if (key === name) {
+                        try {
+                            const decoded = decodeURIComponent(value);
+                            try { return JSON.parse(decoded); } catch(e) { return decoded; }
+                        } catch(e) { return value; }
+                    }
+                }
+                return null;
+            }
+            
+            // ===== PROSES =====
+            if (status === 'success' && username) {
+                // ===== LOGIN SUKSES =====
+                const loginData = {
+                    name: name || username,
+                    username: username,
+                    email: username + '@ciamiskab.go.id',
+                    loginTime: new Date().toISOString(),
+                    foto: ''
+                };
+                
+                // Simpan ke localStorage dan cookie
+                localStorage.setItem("loginData", JSON.stringify(loginData));
+                setCookie('loginData', loginData, 1);
+                
+                // Tampilkan sukses
+                spinner.style.display = 'none';
+                document.querySelector('.icon')?.remove();
+                const successIcon = document.createElement('div');
+                successIcon.className = 'icon success';
+                successIcon.innerHTML = '<i class="fas fa-check-circle"></i>';
+                document.getElementById('callbackContainer').prepend(successIcon);
+                
+                statusText.textContent = '✅ Login Berhasil!';
+                messageText.textContent = `Selamat datang, ${loginData.name}`;
+                homeBtn.style.display = 'inline-block';
+                homeBtn.textContent = '🚀 Lanjut ke Beranda';
+                homeBtn.href = 'index.html?login=success';
+                
+                console.log('[Callback] ✅ Login berhasil untuk:', loginData.name);
+                
+            } else {
+                // ===== LOGIN GAGAL =====
+                spinner.style.display = 'none';
+                const errorIcon = document.createElement('div');
+                errorIcon.className = 'icon error';
+                errorIcon.innerHTML = '<i class="fas fa-times-circle"></i>';
+                document.getElementById('callbackContainer').prepend(errorIcon);
+                
+                statusText.textContent = '❌ Login Gagal';
+                messageText.textContent = message || 'Username atau password salah. Silakan coba lagi.';
+                homeBtn.style.display = 'inline-block';
+                homeBtn.textContent = '🔙 Kembali ke Login';
+                homeBtn.href = 'login.html';
+                
+                console.log('[Callback] ❌ Login gagal:', message);
+            }
+            
+            // ===== HAPUS PARAMETER URL =====
+            setTimeout(() => {
+                const cleanUrl = window.location.origin + window.location.pathname;
+                window.history.replaceState({}, document.title, cleanUrl);
+            }, 1000);
+            
+        })();
+    </script>
+</body>
+</html>
