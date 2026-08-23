@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Login SINGGATERA</title>
     <link rel="icon" type="image/png" href="favicon.png" />
-    <!-- Alternatif untuk berbagai perangkat -->
     <link rel="apple-touch-icon" sizes="180x180" href="favicon.png" />
     <link rel="icon" type="image/png" sizes="32x32" href="favicon.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="favicon.png" />
@@ -168,6 +167,11 @@
         transform: translateY(-2px);
         box-shadow: 0 5px 15px rgba(110, 142, 251, 0.4);
       }
+      .login-button:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: none;
+      }
       .back-home-button {
         width: 100%;
         padding: 12px;
@@ -199,7 +203,6 @@
       .signup-link a:hover {
         text-decoration: underline;
       }
-      /* Tombol kembali ke profile */
       #backToProfile {
         text-align: center;
         margin-top: 20px;
@@ -217,6 +220,20 @@
       #backToProfile .btn-back:hover {
         transform: translateY(-2px);
         box-shadow: 0 5px 15px rgba(108, 117, 125, 0.4);
+      }
+      .loading-spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255,255,255,0.3);
+        border-radius: 50%;
+        border-top-color: #fff;
+        animation: spin 1s ease-in-out infinite;
+        margin-right: 10px;
+        vertical-align: middle;
+      }
+      @keyframes spin {
+        to { transform: rotate(360deg); }
       }
       @media (max-width: 768px) {
         .login-container {
@@ -261,8 +278,8 @@
         <p>Gunakan kredensial Anda</p>
         <form class="login-form" id="loginForm">
           <div class="form-group">
-            <label for="username">Username atau NIP</label
-            ><input
+            <label for="username">Username atau NIP</label>
+            <input
               type="text"
               id="username"
               name="username"
@@ -271,8 +288,8 @@
             />
           </div>
           <div class="form-group">
-            <label for="password">Password</label
-            ><input
+            <label for="password">Password</label>
+            <input
               type="password"
               id="password"
               name="password"
@@ -281,10 +298,13 @@
             />
           </div>
           <div class="remember-forgot">
-            <label><input type="checkbox" name="remember" /> Ingat saya</label
-            ><a href="#">Lupa password?</a>
+            <label><input type="checkbox" name="remember" /> Ingat saya</label>
+            <a href="#">Lupa password?</a>
           </div>
-          <button type="submit" class="login-button">Masuk</button>
+          <button type="submit" class="login-button" id="loginBtn">
+            <span id="btnText">Masuk</span>
+            <span id="btnSpinner" style="display:none;" class="loading-spinner"></span>
+          </button>
           <button
             type="button"
             class="back-home-button"
@@ -293,7 +313,6 @@
             Kembali ke Home
           </button>
         </form>
-        <!-- Tombol Kembali ke Profile (jika dari profile) -->
         <div id="backToProfile" style="display: none;">
           <a href="https://www.profile.singgatera.my.id" class="btn-back">
             <i class="fas fa-arrow-left"></i> Kembali ke Profil
@@ -307,14 +326,178 @@
     </div>
 
     <script>
-      // ===== URL GAS =====
-      // GAS Login - untuk autentikasi user
+      // ====== KONFIGURASI ======
       const GAS_LOGIN_URL = "https://script.google.com/macros/s/AKfycbyHoP_UdQUBDQVOpL8q0F8XfXapfhyGbFRM2qC2NI47sAc_LhSxB4XlMAZvDTBr16C6Bg/exec";
-      
-      // GAS Photo - untuk mengambil foto profile dari spreadsheet (GAS BARU)
-      // GANTI URL DI BAWAH DENGAN URL DEPLOY GAS PHOTO ANDA
       const GAS_PHOTO_URL = "https://script.google.com/macros/s/AKfycbzU-mmjB2eQtk8-y_zj4Pc26YIxrmvcJ_8ZJYWFva0kEFIsx488EUWKfdXcXIO0_msB/exec";
 
+      // ====== FUNGSI COOKIE ======
+      function setCookie(name, value, days = 1) {
+        const expires = new Date();
+        expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
+        
+        // Encode value dengan aman
+        let encodedValue;
+        if (typeof value === 'string') {
+          encodedValue = encodeURIComponent(value);
+        } else {
+          encodedValue = encodeURIComponent(JSON.stringify(value));
+        }
+        
+        // Set cookie untuk semua subdomain
+        const cookieString = `${name}=${encodedValue}; expires=${expires.toUTCString()}; path=/; domain=.singgatera.my.id; SameSite=Lax; Secure`;
+        document.cookie = cookieString;
+        
+        // Set cookie tanpa domain sebagai fallback
+        document.cookie = `${name}=${encodedValue}; expires=${expires.toUTCString()}; path=/; SameSite=Lax; Secure`;
+        
+        console.log(`[Login] ✅ Cookie "${name}" diset dengan domain .singgatera.my.id`);
+        return true;
+      }
+
+      function deleteCookie(name) {
+        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.singgatera.my.id; SameSite=Lax; Secure`;
+        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Lax; Secure`;
+        console.log(`[Login] 🗑️ Cookie "${name}" dihapus`);
+      }
+
+      function getCookie(name) {
+        const cookies = document.cookie.split('; ');
+        for (let cookie of cookies) {
+          const [key, value] = cookie.split('=');
+          if (key === name) {
+            try {
+              const decoded = decodeURIComponent(value);
+              // Coba parse sebagai JSON
+              try {
+                return JSON.parse(decoded);
+              } catch (e) {
+                return decoded;
+              }
+            } catch (e) {
+              return value;
+            }
+          }
+        }
+        return null;
+      }
+
+      // ====== FUNGSI LOGIN ======
+      async function handleLogin(username, password) {
+        const btnText = document.getElementById('btnText');
+        const btnSpinner = document.getElementById('btnSpinner');
+        const loginBtn = document.getElementById('loginBtn');
+        
+        // Tampilkan loading
+        btnText.textContent = 'Memproses...';
+        btnSpinner.style.display = 'inline-block';
+        loginBtn.disabled = true;
+
+        try {
+          // ===== STEP 1: LOGIN =====
+          console.log('[Login] 📤 Mengirim request login...');
+          const loginResponse = await fetch(GAS_LOGIN_URL, {
+            method: "POST",
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: "login",
+              username: username,
+              password: password,
+            }),
+          });
+
+          if (!loginResponse.ok) {
+            throw new Error(`HTTP error! status: ${loginResponse.status}`);
+          }
+
+          const loginResult = await loginResponse.json();
+          console.log('[Login] 📥 Response login:', loginResult);
+
+          if (loginResult.status !== "success") {
+            alert("Login gagal: " + (loginResult.message || "Username atau password salah"));
+            return false;
+          }
+
+          console.log('[Login] ✅ Login berhasil untuk:', loginResult.name);
+
+          // ===== STEP 2: AMBIL FOTO =====
+          btnText.textContent = 'Memuat foto...';
+          
+          let foto = '';
+          try {
+            const photoUrl = `${GAS_PHOTO_URL}?nip=${encodeURIComponent(username)}`;
+            console.log('[Login] 🔍 Ambil foto dari:', photoUrl);
+            const photoResponse = await fetch(photoUrl);
+            
+            if (photoResponse.ok) {
+              const photoResult = await photoResponse.json();
+              console.log('[Login] 📸 Response GAS Photo:', photoResult);
+              if (photoResult.success && photoResult.data) {
+                foto = photoResult.data.foto || '';
+                console.log('[Login] ✅ Foto ditemukan, length:', foto.length);
+              }
+            } else {
+              console.warn('[Login] ⚠️ GAS Photo response not OK:', photoResponse.status);
+            }
+          } catch (photoError) {
+            console.warn('[Login] ⚠️ Gagal ambil foto:', photoError.message);
+          }
+
+          // ===== STEP 3: SIMPAN DATA =====
+          const loginData = {
+            name: loginResult.name,
+            username: username,
+            email: loginResult.email || username + '@ciamiskab.go.id',
+            loginTime: new Date().toISOString(),
+            foto: foto || ''
+          };
+
+          console.log('[Login] 📦 Data login:', {
+            name: loginData.name,
+            username: loginData.username,
+            fotoLength: loginData.foto ? loginData.foto.length : 0
+          });
+
+          // ===== SIMPAN KE LOCALSTORAGE =====
+          localStorage.setItem("loginData", JSON.stringify(loginData));
+          console.log('[Login] ✅ Data disimpan ke localStorage');
+
+          // ===== SIMPAN KE COOKIE =====
+          // Simpan loginData sebagai JSON string
+          setCookie('loginData', loginData, 1);
+          
+          // Simpan foto terpisah
+          if (foto && foto.length > 100) {
+            setCookie('headerPhoto', foto, 1);
+            localStorage.setItem('headerPhotoData', foto);
+            console.log('[Login] ✅ Foto header disimpan ke cookie');
+          } else {
+            deleteCookie('headerPhoto');
+            console.log('[Login] ℹ️ Tidak ada foto yang disimpan');
+          }
+
+          // ===== VERIFIKASI =====
+          console.log('[Login] 🔍 Verifikasi cookie:');
+          const verifyLoginData = getCookie('loginData');
+          const verifyHeaderPhoto = getCookie('headerPhoto');
+          console.log('  - loginData:', verifyLoginData ? '✅ ada' : '❌ tidak ada');
+          console.log('  - headerPhoto:', verifyHeaderPhoto ? '✅ ada' : '❌ tidak ada');
+
+          alert("✅ Login berhasil! Selamat datang, " + loginResult.name);
+          return true;
+
+        } catch (error) {
+          console.error('[Login] ❌ Error:', error);
+          alert("Login gagal. Terdapat kesalahan: " + error.message);
+          return false;
+        } finally {
+          // Reset button
+          btnText.textContent = 'Masuk';
+          btnSpinner.style.display = 'none';
+          loginBtn.disabled = false;
+        }
+      }
+
+      // ====== EVENT LISTENER ======
       document.addEventListener("DOMContentLoaded", function () {
         // ===== CEK APAKAH DARI PROFILE =====
         const referrer = document.referrer || '';
@@ -327,139 +510,52 @@
         const redirectUrl = urlParams.get('redirect');
         if (redirectUrl) {
           sessionStorage.setItem('redirectAfterLogin', redirectUrl);
-          console.log('[Login] Akan redirect ke:', redirectUrl);
+          console.log('[Login] 🔄 Akan redirect ke:', redirectUrl);
         }
 
-        document
-          .getElementById("loginForm")
-          .addEventListener("submit", async function (e) {
-            e.preventDefault();
+        // ===== SUBMIT FORM =====
+        document.getElementById("loginForm").addEventListener("submit", async function (e) {
+          e.preventDefault();
 
-            const submitButton = this.querySelector(".login-button");
-            const originalText = submitButton.textContent;
+          const username = document.getElementById("username").value.trim();
+          const password = document.getElementById("password").value;
 
-            // Tampilkan loading
-            submitButton.textContent = "Memproses...";
-            submitButton.disabled = true;
+          if (!username || !password) {
+            alert("Mohon isi username dan password!");
+            return;
+          }
 
-            const username = document.getElementById("username").value;
-            const password = document.getElementById("password").value;
-
-            try {
-              // ===== STEP 1: LOGIN =====
-              const loginResponse = await fetch(GAS_LOGIN_URL, {
-                method: "POST",
-                body: JSON.stringify({
-                  action: "login",
-                  username: username,
-                  password: password,
-                }),
-              });
-
-              if (!loginResponse.ok) {
-                throw new Error(`HTTP error! status: ${loginResponse.status}`);
-              }
-
-              const loginResult = await loginResponse.json();
-
-              if (loginResult.status !== "success") {
-                alert("Login gagal: " + loginResult.message);
-                return;
-              }
-
-              console.log('[Login] ✅ Login berhasil:', loginResult.name);
-
-              // ===== STEP 2: AMBIL FOTO DARI GAS PHOTO =====
-              submitButton.textContent = "Memuat foto...";
-              
-              let foto = '';
-              try {
-                const photoUrl = `${GAS_PHOTO_URL}?nip=${encodeURIComponent(username)}`;
-                console.log('[Login] 🔍 Ambil foto dari:', photoUrl);
-                const photoResponse = await fetch(photoUrl);
-                
-                if (photoResponse.ok) {
-                  const photoResult = await photoResponse.json();
-                  console.log('[Login] 📸 Response GAS Photo:', photoResult);
-                  if (photoResult.success && photoResult.data) {
-                    foto = photoResult.data.foto || '';
-                    console.log('[Login] ✅ Foto ditemukan, length:', foto.length);
-                  } else {
-                    console.warn('[Login] ⚠️ Foto tidak ditemukan di response');
-                  }
-                } else {
-                  console.warn('[Login] ⚠️ GAS Photo response not OK:', photoResponse.status);
-                }
-              } catch (photoError) {
-                console.warn('[Login] ⚠️ Gagal ambil foto dari GAS Photo:', photoError);
-              }
-
-              // ===== STEP 3: SIMPAN DATA =====
-              const loginData = {
-                name: loginResult.name,
-                username: username,
-                loginTime: new Date().toISOString(),
-                foto: foto || ''
-              };
-
-              console.log('[Login] 📦 Data login:', {
-                name: loginData.name,
-                username: loginData.username,
-                fotoLength: loginData.foto ? loginData.foto.length : 0
-              });
-
-              // ===== SIMPAN KE LOCALSTORAGE =====
-              localStorage.setItem("loginData", JSON.stringify(loginData));
-
-              // ===== SIMPAN KE COOKIE (UNTUK SEMUA SUBDOMAIN) =====
-              const cookieValue = encodeURIComponent(JSON.stringify(loginData));
-              document.cookie = `loginData=${cookieValue}; path=/; domain=.singgatera.my.id; max-age=86400; SameSite=Lax; Secure`;
-              
-              // ===== SIMPAN FOTO KE COOKIE TERPISAH UNTUK HEADER =====
-              if (foto && foto.length > 100) {
-                const fotoCookie = encodeURIComponent(foto);
-                document.cookie = `headerPhoto=${fotoCookie}; path=/; domain=.singgatera.my.id; max-age=86400; SameSite=Lax; Secure`;
-                console.log('[Login] ✅ Foto header disimpan ke cookie, length:', foto.length);
-                
-                // Simpan juga ke localStorage
-                localStorage.setItem('headerPhotoData', foto);
-              } else {
-                console.warn('[Login] ⚠️ Foto tidak valid, length:', foto ? foto.length : 0);
-                document.cookie = `headerPhoto=; path=/; domain=.singgatera.my.id; max-age=0`;
-              }
-              
-              console.log('[Login] ✅ Data login:', loginData);
-
-              alert("Login berhasil! Selamat datang, " + loginResult.name);
-              
-              // ===== REDIRECT =====
-              const redirectAfter = sessionStorage.getItem('redirectAfterLogin');
-              if (redirectAfter) {
-                sessionStorage.removeItem('redirectAfterLogin');
-                const encodedData = encodeURIComponent(JSON.stringify(loginData));
-                const separator = redirectAfter.includes('?') ? '&' : '?';
-                window.location.href = `${redirectAfter}${separator}loginData=${encodedData}`;
-              } else {
-                window.location.href = "index.html?login=success";
-              }
-
-            } catch (error) {
-              alert("Login gagal. Terdapat kesalahan: " + error.message);
-              console.error("Error:", error);
-            } finally {
-              // Reset button
-              submitButton.textContent = originalText;
-              submitButton.disabled = false;
+          const success = await handleLogin(username, password);
+          
+          if (success) {
+            // ===== REDIRECT =====
+            const redirectAfter = sessionStorage.getItem('redirectAfterLogin');
+            if (redirectAfter) {
+              sessionStorage.removeItem('redirectAfterLogin');
+              window.location.href = redirectAfter;
+            } else {
+              window.location.href = "index.html?login=success";
             }
-          });
+          }
+        });
+
+        // ===== KEYBOARD SHORTCUT: ENTER =====
+        document.getElementById('password').addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') {
+            document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+          }
+        });
       });
 
-      // Function untuk testing login
+      // ====== FUNGSI TESTING ======
       function testLogin() {
         document.getElementById("username").value = "196512101987031001";
         document.getElementById("password").value = "password123";
         document.getElementById("loginForm").dispatchEvent(new Event("submit"));
       }
+      
+      // Expose ke console untuk debugging
+      console.log('[Login] 🔧 Untuk testing, ketik: testLogin()');
     </script>
   </body>
 </html>
