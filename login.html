@@ -418,14 +418,14 @@
               // ===== SIMPAN FOTO KE COOKIE TERPISAH UNTUK HEADER =====
               if (foto && foto.length > 100) {
                 const fotoCookie = encodeURIComponent(foto);
-                document.cookie = `headerPhoto=${fotoCookie}; path=/; www.domain=.singgatera.my.id; max-age=86400; SameSite=Lax; Secure`;
+                document.cookie = `headerPhoto=${fotoCookie}; path=/; domain=.singgatera.my.id; max-age=86400; SameSite=Lax; Secure`;
                 console.log('[Login] ✅ Foto header disimpan ke cookie, length:', foto.length);
                 
                 // Simpan juga ke localStorage
                 localStorage.setItem('headerPhotoData', foto);
               } else {
                 console.warn('[Login] ⚠️ Foto tidak valid, length:', foto ? foto.length : 0);
-                document.cookie = `headerPhoto=; path=/; www.domain=.singgatera.my.id; max-age=0`;
+                document.cookie = `headerPhoto=; path=/; domain=.singgatera.my.id; max-age=0`;
               }
               
               console.log('[Login] ✅ Data login:', loginData);
