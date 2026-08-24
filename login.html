@@ -434,14 +434,13 @@
               
               // ===== REDIRECT =====
               const redirectAfter = sessionStorage.getItem('redirectAfterLogin');
-              if (redirectAfter) {
-                sessionStorage.removeItem('redirectAfterLogin');
-                const encodedData = encodeURIComponent(JSON.stringify(loginData));
-                const separator = redirectAfter.includes('?') ? '&' : '?';
-                window.location.href = `${redirectAfter}${separator}loginData=${encodedData}`;
-              } else {
-                window.location.href = "index.html?login=success";
-              }
+
+if (redirectAfter) {
+  sessionStorage.removeItem('redirectAfterLogin');
+  window.location.href = redirectAfter;
+} else {
+  window.location.href = "index.html?login=success";
+}
 
             } catch (error) {
               alert("Login gagal. Terdapat kesalahan: " + error.message);
