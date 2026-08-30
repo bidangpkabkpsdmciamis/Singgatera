@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profil ASN - SINGGATERA</title>
+  <link rel="icon" type="image/png" href="favicon.png" />
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ===== HEADER ===== -->
+  <header class="header" id="header">
+    <div class="container header-container">
+      <a href="https://www.singgatera.my.id/" class="logo">
+        <img src="https://i.ibb.co.com/JWw8qHmM/logo-bkpsdm.png" alt="BKPSDM Logo" class="logo-img" />
+        <div class="logo-text">
+          <div class="logo-title">SINGGATERA</div>
+          <div class="logo-subtitle">BKPSDM Kabupaten Ciamis</div>
+        </div>
+      </a>
+
+      <nav class="nav" id="nav">
+        <ul class="nav-links">
+          <li><a href="https://www.singgatera.my.id/" class="nav-link">Home</a></li>
+          <li><a href="https://www.singgatera.my.id/evaluasi.html" class="nav-link">Evaluasi</a></li>
+          <li><a href="#" class="nav-link active">Profil</a></li>
+        </ul>
+
+        <div class="header-actions">
+          <div class="user-profile">
+            <!-- ===== PERUBAHAN: TAMBAHKAN id="headerUserIcon" ===== -->
+            <div class="user-btn" id="userBtn">
+              <div class="user-icon" id="headerUserIcon">
+                <i class="fas fa-user"></i>
+              </div>
+              <div class="user-name" id="userName">Guest</div>
+              <i class="fas fa-chevron-down"></i>
+            </div>
+
+            <div class="user-dropdown" id="userDropdown">
+              <div class="user-info">
+                <h4 id="dropdownName">Guest</h4>
+                <p class="user-email" id="dropdownEmail">-</p>
+              </div>
+              <div class="dropdown-links">
+                <a href="#" class="dropdown-link">
+                  <i class="fas fa-user-circle"></i>
+                  <span>Profil Saya</span>
+                </a>
+                <a href="#" class="dropdown-link" id="logoutBtn">
+                  <i class="fas fa-sign-out-alt"></i>
+                  <span>Keluar</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <div class="mobile-toggle" id="mobileToggle">
+        <i class="fas fa-bars"></i>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== PROFILE CONTAINER ===== -->
+  <div class="profile-container" id="profileContainer">
+    
+    <!-- ===== PROFILE HEADER ===== -->
+    <div class="profile-header" id="profileHeader">
+      <!-- ===== PERUBAHAN: TAMBAHKAN id="profileAvatar" ===== -->
+      <div class="profile-avatar" id="profileAvatar">
+        <i class="fas fa-user-circle"></i>
+      </div>
+      <div class="profile-info">
+        <h1 id="profileName">Memuat...</h1>
+        <div class="nip" id="profileNip">NIP: -</div>
+        <span class="badge" id="profileStatus">ASN</span>
+        
+        <!-- ===== TOMBOL EDIT PROFIL ===== -->
+        <div style="margin-top: 15px;">
+          <button id="editProfileBtn" class="btn btn-accent" style="padding: 8px 20px; font-size: 0.9rem; min-width: 140px;">
+            <i class="fas fa-edit"></i> <span id="editBtnText">Edit Profil</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== GRID ===== -->
+    <div class="profile-grid">
+      
+      <!-- ===== IDENTITAS ===== -->
+      <div class="card">
+        <div class="card-header">
+          <h2>👤 Identitas ASN</h2>
+        </div>
+        <div class="identitas-list" id="identitasContainer">
+          <div class="loading">
+            <div class="spinner"></div>
+            <p>Memuat data identitas...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== CHART SPIDER ===== -->
+      <div class="card">
+        <div class="card-header">
+          <h2>🕸️ Diagram Kompetensi</h2>
+        </div>
+        <div class="chart-wrapper" id="chartWrapper">
+          <canvas id="spiderChart"></canvas>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ===== REKAP KOMPETENSI ===== -->
+    <div id="rekapContainer">
+      <div class="loading">
+        <div class="spinner"></div>
+        <p>Memuat data rekapitulasi...</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer">
+    <div class="container footer-container">
+      <div class="footer-content">
+        <div class="footer-col footer-logo">
+          <img src="https://i.ibb.co.com/JWw8qHmM/logo-bkpsdm.png" alt="BKPSDM Logo" />
+          <p>
+            Sistem Informasi Bidang Pengembangan Kompetensi Aparatur
+            (SINGGATERA) merupakan platform digital terpadu untuk meningkatkan
+            kompetensi dan profesionalisme ASN Kabupaten Ciamis.
+          </p>
+        </div>
+
+        <div class="footer-col footer-links">
+          <h4>Link Cepat</h4>
+          <ul>
+            <li><a href="https://www.singgatera.my.id/"><i class="fas fa-home"></i> Beranda</a></li>
+            <li><a href="#"><i class="fas fa-user-tie"></i> Pelatihan</a></li>
+            <li><a href="#"><i class="fas fa-chart-bar"></i> Asesmen</a></li>
+            <li><a href="#"><i class="fas fa-graduation-cap"></i> Tugas Belajar</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col footer-links">
+          <h4>Layanan</h4>
+          <ul>
+            <li><a href="#"><i class="fas fa-comments"></i> Konsultasi & Saran</a></li>
+            <li><a href="#"><i class="fas fa-newspaper"></i> Informasi Terkini</a></li>
+            <li><a href="#"><i class="fas fa-download"></i> Unduhan</a></li>
+            <li><a href="#"><i class="fas fa-question-circle"></i> Bantuan</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col footer-contact">
+          <h4>Kontak Kami</h4>
+          <div class="contact-item">
+            <i class="fas fa-map-marker-alt"></i>
+            <p>Jl. Sadananya No. 27, Kelurahan Maleber, Kecamatan Ciamis, Kabupaten Ciamis</p>
+          </div>
+          <div class="contact-item">
+            <i class="fas fa-envelope"></i>
+            <p>bidangpkabkpsdmciamis@gmail.com<br />bkpsdm@ciamiskab.go.id</p>
+          </div>
+          <div class="contact-item">
+            <i class="fas fa-phone"></i>
+            <p>0821 1356 8415<br />Senin - Jumat, 08:00 - 15:15 WIB</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="partner-logos">
+        <img src="https://i.ibb.co.com/tMnbFSr5/Lambang-Kabupaten-Ciamis.png" alt="Lambang Kabupaten Ciamis" class="partner-logo" />
+        <img src="https://i.ibb.co.com/JWw8qHmM/logo-bkpsdm.png" alt="Logo BKPSDM" class="partner-logo" />
+        <img src="https://i.ibb.co.com/6JvSKyNf/Logo-Ber-AKHLAK-svg.png" alt="Logo BerAKHLAK" class="partner-logo" />
+        <img src="https://i.ibb.co.com/99NKJGNg/bangga.png" alt="Bangga Melayani Bangsa" class="partner-logo" />
+      </div>
+
+      <div class="footer-bottom">
+        <div class="copyright">
+          <p>&copy; 2026 <a href="https://www.singgatera.my.id/">PKA BKPSDM Kabupaten Ciamis</a>. All Rights Reserved.</p>
+          <p>Versi 3.0 | Terakhir diperbarui: Juli 2026</p>
+        </div>
+        <div class="social-links">
+          <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+          <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+          <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===== SCROLL TO TOP ===== -->
+  <div class="scroll-top" id="scrollTop">
+    <i class="fas fa-arrow-up"></i>
+  </div>
+
+  <!-- ===== SCRIPTS ===== -->
+  <script src="config.js"></script>
+  <script src="components/profile-data.js"></script>
+  <script src="components/kompetensi.js"></script>
+  <script src="components/spider-chart.js"></script>
+  <script src="components/edit-profile.js"></script>
+  <script src="script.js"></script>
+  
+</body>
+</html>
